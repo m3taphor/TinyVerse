@@ -62,14 +62,9 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
   - Proxy Binding
   - User-Agent Binding
 - Auto Login
-- Auto Days Sign-In
 - Auto collect Offline Bonus
-- Auto Tap
-- Auto Upgrade Tap Cards
-- Auto Upgrade Mine Cards
-- Auto Task
-  - Join Channels
-  - Change Name
+- Auto Refer
+- Auto Dust Collect
 - Night-Mode Sleep
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
