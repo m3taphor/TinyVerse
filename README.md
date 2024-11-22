@@ -65,6 +65,7 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 - Auto collect Offline Bonus
 - Auto Refer
 - Auto Dust Collect
+- Auto create galaxy
 - Night-Mode Sleep
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
