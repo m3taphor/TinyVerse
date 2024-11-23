@@ -49,9 +49,9 @@
 
 ## About The Project
 
-[![Bums][product-screenshot]](https://i.ibb.co/C8sbzRY/image.png)
+[![TVerse][product-screenshot]](https://i.ibb.co/C8sbzRY/image.png)
 
-An automated script/code made by @m3taphor on [Python 3.10](https://www.python.org/downloads/release/python-3100/) for [@tverse](https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f) or [@TVerseAppBot](https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f), built using Bums app APIs. It supports multiple sessions through [Pyrogram](https://github.com/pyrogram/pyrogram), with custom proxy support via an `accounts.json` configuration file.
+An automated script/code made by @m3taphor on [Python 3.10](https://www.python.org/downloads/release/python-3100/) for [@tverse](https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f) or [@TVerseAppBot](https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f), built using TinyVerse (Tiny-Verse/TVerse) app APIs. It supports multiple sessions through [Pyrogram](https://github.com/pyrogram/pyrogram), with custom proxy support via an `accounts.json` configuration file.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
