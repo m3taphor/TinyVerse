@@ -398,7 +398,7 @@ class Tapper:
                             await asyncio.sleep(delay=sleep_time)
                             break
 
-                        dust_progress = int(user_data['response'].get('dust_progress')) or 0
+                        dust_progress = float(user_data['response'].get('dust_progress')) or 0
                         if dust_progress > 0:
                             logger.info(f"{self.session_name} | Collecting Dust...")
                             collect_dust = await self.collect_dust(http_client, session_token=session_token)
