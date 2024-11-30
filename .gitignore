@@ -165,3 +165,7 @@ sessions/
 __pycache__
 *.session
 *.cpython-310.pyc
+user_agents.json
+*.json
+proxies.txt
+proxy.txt

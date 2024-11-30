@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import json
+import shutil
 import os
 import random
 import re
@@ -18,14 +19,17 @@ import aiohttp
 from aiohttp_proxy import ProxyConnector
 from better_proxy import Proxy
 from pyrogram import Client
-from pyrogram.errors import Unauthorized, UserDeactivated, AuthKeyUnregistered, FloodWait
+from pyrogram.errors import (
+    Unauthorized, UserDeactivated, AuthKeyUnregistered, UserDeactivatedBan,
+    AuthKeyDuplicated, SessionExpired, SessionRevoked, FloodWait
+)
 from pyrogram.raw import types
 from pyrogram.raw import functions
 
 from bot.config import settings
 
 from bot.utils import logger
-from bot.exceptions import InvalidSession
+from bot.exceptions import TelegramInvalidSessionException, TelegramProxyError
 from .headers import headers
 
 from random import randint, choices
@@ -56,6 +60,12 @@ class Tapper:
         self.balance = 0
         self.template_to_join = 0
         self.user_id = 0
+        self.boost_translation = {
+            1: "3h +20% Speed",
+            2: "12h +50% Speed",
+            3: "3h Auto-Collect",
+            4: "12h Auto-Collect"
+        }
 
     async def get_tg_web_data(self, proxy: str | None) -> str:
         if proxy:
@@ -74,12 +84,8 @@ class Tapper:
 
         try:
             if not self.tg_client.is_connected:
-                try:
-                    await self.tg_client.connect()
+                await self.tg_client.connect()
 
-                except (Unauthorized, UserDeactivated, AuthKeyUnregistered):
-                    raise InvalidSession(self.session_name)
-            
             while True:
                 try:
                     peer = await self.tg_client.resolve_peer(self.bot_peer)
@@ -121,12 +127,18 @@ class Tapper:
 
             return ref_id, tg_web_data
 
-        except InvalidSession as error:
-            raise error
-
+        except (Unauthorized, UserDeactivated, AuthKeyUnregistered, UserDeactivatedBan, AuthKeyDuplicated,
+                SessionExpired, SessionRevoked):
+            raise TelegramInvalidSessionException(f"Telegram session is invalid. Client: {self.tg_client.name}")
+        except AttributeError as e:
+            raise TelegramProxyError(e)
         except Exception as error:
             logger.error(f"{self.session_name} | Unknown error during Authorization: {error}")
             await asyncio.sleep(delay=3)
+            
+        finally:
+            if self.tg_client.is_connected:
+                await self.tg_client.disconnect()
 
     @error_handler
     async def check_proxy(self, http_client: aiohttp.ClientSession, proxy: Proxy) -> None:
@@ -254,6 +266,31 @@ class Tapper:
         if response.get('response'):
             return response
         return None
+    
+    @error_handler
+    async def get_boost(self, http_client: aiohttp.ClientSession, session_token):
+        additional_headers = {'X-Api-Request-Id': gen_xapi()}
+        urlencoded_data = {
+            "session": session_token
+        }
+        
+        response = await self.make_request(http_client, 'POST', endpoint="/user/boosts", extra_headers=additional_headers, urlencoded_data=urlencoded_data)
+        if response.get('response'):
+            return response
+        return None
+    
+    @error_handler
+    async def activate_boost(self, http_client: aiohttp.ClientSession, session_token, boost_id):
+        additional_headers = {'X-Api-Request-Id': gen_xapi()}
+        urlencoded_data = {
+            "session": session_token,
+            "boost_id": boost_id
+        }
+        
+        response = await self.make_request(http_client, 'POST', endpoint="/boost/activate", extra_headers=additional_headers, urlencoded_data=urlencoded_data)
+        if response.get("response", {}).get("success") == 1:
+            return response
+        return None
 
     async def run(self, user_agent: str, proxy: str | None) -> None:
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
@@ -284,7 +321,13 @@ class Tapper:
 
                     sleep_time = randint(settings.SLEEP_TIME[0], settings.SLEEP_TIME[1])
 
-                    ref_id, init_data = await self.get_tg_web_data(proxy=proxy)
+                    try:
+                        ref_id, init_data = await self.get_tg_web_data(proxy=proxy)
+                    except TelegramProxyError:
+                        return logger.error(f"<r>The selected proxy cannot be applied to the Telegram client.</r>")
+                    except Exception as e:
+                        return logger.error(f"Stop Tapper. Reason: {e}")
+                    
                     logger.info(f"{self.session_name} | Trying to login")
                     
                     # Login
@@ -297,7 +340,7 @@ class Tapper:
                     
                     session_token = login_data.get("response", {}).get("session")
                     
-                    logger.success(f"{self.session_name} | <g>🌌 Login Successful</g>")
+                    logger.success(f"{self.session_name} | <g>🪐 Login Successful</g>")
                     
                     # User-Data
                     user_data = await self.user_data(http_client, session_token=session_token)
@@ -366,15 +409,50 @@ class Tapper:
                                 break
                             dust_collected = collect_dust['response'].get('dust') or 0
                             logger.success(f"{self.session_name} | Dust collected: <g>+{dust_collected}</g>")
+                            
+                    await asyncio.sleep(random.randint(1, 3))
+                        
+                    # Apply Boost
+                    if settings.AUTO_APPLY_BOOST:
+                        boost_data = await self.get_boost(http_client, session_token=session_token)
+                        if not boost_data:
+                            logger.error(f"{self.session_name} | Unknown error while collecting Boost Data!")
+                            logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
+                            await asyncio.sleep(delay=sleep_time)
+                            break
+                        
+                        total_boost = int(boost_data['response'].get('count')) or 0
+                        current_time = int(time())
+                        threshold = 3 * 60 * 60
+                        if total_boost > 0:
+                            for item in boost_data['response']['items']:
+                                boost_id = int(item['boost_id'])
+                                expires = int(item['expires']) or 0
+                                if expires == 0 or expires - current_time > threshold:
+                                    apply_boost = await self.activate_boost(http_client, session_token=session_token, boost_id=boost_id)
+                                    if not apply_boost:
+                                        logger.error(f"{self.session_name} | Unknown error while activating Boost!")
+                                        logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
+                                        await asyncio.sleep(delay=sleep_time)
+                                        break
+                                    
+                                    logger.success(f"{self.session_name} | Boost Activated <y>{boost_id}</y>: <g>({self.boost_translation.get(boost_id, 'N/A')})</g>")
+                                    
+                                await asyncio.sleep(random.randint(1, 3))
+                                
+                    logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
+                    await asyncio.sleep(delay=sleep_time)
 
-                        logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
-                        await asyncio.sleep(delay=sleep_time)
-
-                except InvalidSession as error:
-                    raise error
+                except Exception as error:
+                    logger.error(f"{self.session_name} | Unknown error: {error}")
+                    await asyncio.sleep(delay=3)
 
 async def run_tapper(tg_client: Client, user_agent: str, proxy: str | None, first_run: bool):
     try:
         await Tapper(tg_client=tg_client, first_run=first_run).run(user_agent=user_agent, proxy=proxy)
-    except InvalidSession:
-        logger.error(f"{tg_client.name} | Invalid Session")
+    except TelegramInvalidSessionException:
+        session_file = f"sessions/{tg_client.name}.session"
+        if not os.path.exists("sessions/deleted_sessions"):
+            os.makedirs("sessions/deleted_sessions", exist_ok=True)
+        shutil.move(session_file, f"sessions/deleted_sessions/{tg_client.name}.session")
+        logger.error(f"Telegram account {tg_client.name} is not work!")
