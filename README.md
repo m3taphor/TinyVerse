@@ -105,6 +105,9 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 | **NIGHT_TIME**           |            [Night Mode]: Hours of sleep on UTC Timezone [start, end] (by default - [0, 7])             |
 | **NIGHT_CHECKING**       |     [Night Mode]: Delay (in seconds) to check if night hours are over (by default - [3600, 7200])      |
 | **AUTO_COLLECT_DUST**    |                           Auto collect Star dust of Galaxy (default - True)                            |
+| **AUTO_APPLY_BOOST**     |                               Auto apply remaning Boost (default - True)                               |
+| **EXTRA_BOOST_DELAY**    |               Delay after auto-collect Boost is Done before proceeding (default - [100, 500])                |
+| **AUTO_COLLECT_DUST**    |                           Auto collect Star dust of Galaxy (default - True)                            |
 | **SLEEP_TIME**           |           Sleep delay (in seconds) before restarting session again (default - [2700, 4200])            |
 | **START_DELAY**          |                        Delay (in seconds) to start process (default - [5, 100])                        |
 | **IN_USE_SESSIONS_PATH** |       Path of text file for appending in-use session (default - 'bot/config/used_sessions.txt')        |

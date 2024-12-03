@@ -11,7 +11,9 @@ class Settings(BaseSettings):
     SUPPORT_AUTHOR: bool = True
     
     AUTO_COLLECT_DUST: bool = True
+    
     AUTO_APPLY_BOOST: bool = True
+    EXTRA_BOOST_DELAY: list[int] = [100, 500]
 
     SLEEP_TIME: list[int] = [2700, 4200]
     START_DELAY: list[int] = [5, 100]

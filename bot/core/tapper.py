@@ -423,12 +423,14 @@ class Tapper:
                         
                         total_boost = int(boost_data['response'].get('count')) or 0
                         current_time = int(time())
-                        threshold = 3 * 60 * 60
+                        boost_delay = 0
+                        
                         if total_boost > 0:
                             for item in boost_data['response']['items']:
                                 boost_id = int(item['boost_id'])
                                 expires = int(item['expires']) or 0
-                                if expires == 0 or expires - current_time > threshold:
+                                # print(f'Expire: {expires} | Current: {current_time} | Sum: {expires - current_time} | Thres: {expires + threshold}')
+                                if expires == 0 or current_time > expires:
                                     apply_boost = await self.activate_boost(http_client, session_token=session_token, boost_id=boost_id)
                                     if not apply_boost:
                                         logger.error(f"{self.session_name} | Unknown error while activating Boost!")
@@ -437,8 +439,20 @@ class Tapper:
                                         break
                                     
                                     logger.success(f"{self.session_name} | Boost Activated <y>{boost_id}</y>: <g>({self.boost_translation.get(boost_id, 'N/A')})</g>")
-                                    
+                                
+                                if boost_id == 4:  # 12 Hours boost
+                                    boost_delay = max(boost_delay, 12 * 60 * 60)
+                                elif boost_id == 3:  # 3 Hours boost
+                                    boost_delay = max(boost_delay, 3 * 60 * 60)
+                                
                                 await asyncio.sleep(random.randint(1, 3))
+                        if boost_delay > 0:
+                            adjusted_sleep = boost_delay + random.randint(settings.EXTRA_BOOST_DELAY[0], settings.EXTRA_BOOST_DELAY[1]) - sleep_time
+                            if adjusted_sleep > 0:
+                                hours, minutes = divmod(adjusted_sleep // 60, 60)
+                                logger.info(f"{self.session_name} | Sleep <y>{hours} hour, {minutes} mins</y>; due to auto-collect boost.")
+                                await asyncio.sleep(adjusted_sleep)
+                                
                                 
                     logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
                     await asyncio.sleep(delay=sleep_time)
