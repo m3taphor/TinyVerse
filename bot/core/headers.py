@@ -1,6 +1,7 @@
 headers = {
     "Host": "api.tonverse.app",
     "Connection": "keep-alive",
+    "X-Application-Version": "0.6.30",
     "sec-ch-ua-platform": "\"Windows\"",
     "X-Requested-With": "XMLHttpRequest",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
