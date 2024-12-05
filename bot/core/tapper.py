@@ -34,7 +34,7 @@ from .headers import headers
 
 from random import randint, choices
 
-from bot.utils.functions import gen_xapi, unix_convert
+from bot.utils.functions import unix_convert
 
 from ..utils.firstrun import append_line_to_file
 
@@ -203,91 +203,84 @@ class Tapper:
         
     @error_handler
     async def login(self, http_client: aiohttp.ClientSession, init_data):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
         urlencoded_data = {
             "bot_id": self.bot_chatid,
             "data": init_data
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/auth/telegram", extra_headers=additional_headers, urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/auth/telegram", urlencoded_data=urlencoded_data)
         if response and response.get("response", {}).get("session"):
             return response
         return None
 
     @error_handler
     async def user_data(self, http_client: aiohttp.ClientSession, session_token, id="undefined"):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
         urlencoded_data = {
             "session": session_token,
             "id": id
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/user/info", extra_headers=additional_headers, urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/user/info", urlencoded_data=urlencoded_data)
         if response.get('response'):
             return response
         return None
     
     @error_handler
     async def get_galaxy(self, http_client: aiohttp.ClientSession, session_token, id="null", member_id="null"):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
         urlencoded_data = {
             "session": session_token,
             "id": id,
             "member_id": member_id
         }
 
-        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/get", extra_headers=additional_headers, urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/get", urlencoded_data=urlencoded_data)
         if response.get('response'):
             return response
         return None
     
     @error_handler
     async def begin_galaxy(self, http_client: aiohttp.ClientSession, session_token, stars, referral):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
         urlencoded_data = {
             "session": session_token,
             "stars": stars,
             "referral": referral
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/begin", extra_headers=additional_headers, urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/begin", urlencoded_data=urlencoded_data)
         if response.get("response", {}).get("success") == 1:
             return response
         return None
     
     @error_handler
     async def collect_dust(self, http_client: aiohttp.ClientSession, session_token):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
         urlencoded_data = {
             "session": session_token
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/collect", extra_headers=additional_headers, urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/collect", urlencoded_data=urlencoded_data)
         if response.get('response'):
             return response
         return None
     
     @error_handler
     async def get_boost(self, http_client: aiohttp.ClientSession, session_token):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
         urlencoded_data = {
             "session": session_token
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/user/boosts", extra_headers=additional_headers, urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/user/boosts", urlencoded_data=urlencoded_data)
         if response.get('response'):
             return response
         return None
     
     @error_handler
     async def activate_boost(self, http_client: aiohttp.ClientSession, session_token, boost_id):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
         urlencoded_data = {
             "session": session_token,
             "boost_id": boost_id
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/boost/activate", extra_headers=additional_headers, urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/boost/activate", urlencoded_data=urlencoded_data)
         if response.get("response", {}).get("success") == 1:
             return response
         return None
