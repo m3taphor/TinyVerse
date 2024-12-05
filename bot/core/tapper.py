@@ -429,8 +429,9 @@ class Tapper:
                             for item in boost_data['response']['items']:
                                 boost_id = int(item['boost_id'])
                                 expires = int(item['expires']) or 0
-                                # print(f'Expire: {expires} | Current: {current_time} | Sum: {expires - current_time} | Thres: {expires + threshold}')
-                                if expires == 0 or current_time > expires:
+                                boost_count = int(item['count']) or 0
+                                
+                                if expires == 0 or current_time > expires and boost_count > 0:
                                     apply_boost = await self.activate_boost(http_client, session_token=session_token, boost_id=boost_id)
                                     if not apply_boost:
                                         logger.error(f"{self.session_name} | Unknown error while activating Boost!")
