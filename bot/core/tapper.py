@@ -197,26 +197,26 @@ class Tapper:
             response = await http_client.request(method, full_url, headers=request_headers, **kwargs)
             response.raise_for_status()
             if settings.SAVE_RESPONSE_DATA:
-                response_data = ""
-                response_data += f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-                response_data += f"Request URL: {full_url}\n"
+                    response_data = ""
+                    response_data += f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                    response_data += f"Request URL: {full_url}\n"
 
-                if method == 'POST':
-                    request_body = kwargs.get('json', None)
-                    if request_body is not None:
-                        response_data += f"Request Body (JSON): {json.dumps(request_body, indent=2)}\n\n"
-                    else:
-                        request_body = kwargs.get('data', None)
+                    if method == 'POST':
+                        request_body = kwargs.get('json', None)
                         if request_body is not None:
-                            response_data += f"Request Body (Data): {request_body}\n\n"
+                            response_data += f"Request Body (JSON): {json.dumps(request_body, indent=2)}\n\n"
+                        else:
+                            request_body = kwargs.get('data', None)
+                            if request_body is not None:
+                                response_data += f"Request Body (Data): {request_body}\n\n"
 
-                response_data += f"Response Code: {response.status}\n"
-                response_data += f"Response Headers: {response.headers}\n"
-                response_data += f"Response Body: {await response.text()}\n"
-                response_data += "-" * 50 + "\n"
-            
-            with open("saved_data.txt", "a", encoding='utf8') as file:
-                file.write(response_data)
+                    response_data += f"Response Code: {response.status}\n"
+                    response_data += f"Response Headers: {dict(response.headers)}\n"
+                    response_data += f"Response Body: {await response.text()}\n"
+                    response_data += "-" * 50 + "\n"
+                    
+                    with open("saved_data.txt", "a", encoding='utf8') as file:
+                        file.write(response_data)
                 
             return await response.json()
         except (aiohttp.ClientResponseError, aiohttp.ClientError, Exception) as error:
@@ -225,112 +225,91 @@ class Tapper:
     
     @error_handler
     async def login(self, http_client: aiohttp.ClientSession, init_data):
-<<<<<<< HEAD
         additional_headers = {'X-Application-Version': self.app_version}
-=======
->>>>>>> dc8fde941444d9deda84b4ef6cdd071b48437c02
         urlencoded_data = {
             "bot_id": self.bot_chatid,
             "data": init_data
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/auth/telegram", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/auth/telegram", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response and response.get("response", {}).get("session"):
             return response
         return None
 
     @error_handler
     async def user_data(self, http_client: aiohttp.ClientSession, session_token, id="undefined"):
-<<<<<<< HEAD
         additional_headers = {'X-Application-Version': self.app_version}
-=======
->>>>>>> dc8fde941444d9deda84b4ef6cdd071b48437c02
         urlencoded_data = {
             "session": session_token,
             "id": id
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/user/info", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/user/info", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response.get('response'):
             return response
         return None
     
     @error_handler
     async def get_galaxy(self, http_client: aiohttp.ClientSession, session_token, id="null", member_id="null"):
-<<<<<<< HEAD
         additional_headers = {'X-Application-Version': self.app_version}
-=======
->>>>>>> dc8fde941444d9deda84b4ef6cdd071b48437c02
         urlencoded_data = {
             "session": session_token,
             "id": id,
             "member_id": member_id
         }
 
-        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/get", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/get", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response.get('response'):
             return response
         return None
     
     @error_handler
     async def begin_galaxy(self, http_client: aiohttp.ClientSession, session_token, stars, referral):
-<<<<<<< HEAD
         additional_headers = {'X-Application-Version': self.app_version}
-=======
->>>>>>> dc8fde941444d9deda84b4ef6cdd071b48437c02
         urlencoded_data = {
             "session": session_token,
             "stars": stars,
             "referral": referral
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/begin", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/begin", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response.get("response", {}).get("success") == 1:
             return response
         return None
     
     @error_handler
     async def collect_dust(self, http_client: aiohttp.ClientSession, session_token):
-<<<<<<< HEAD
         additional_headers = {'X-Application-Version': self.app_version}
-=======
->>>>>>> dc8fde941444d9deda84b4ef6cdd071b48437c02
         urlencoded_data = {
             "session": session_token
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/collect", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/collect", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response.get('response'):
             return response
         return None
     
     @error_handler
     async def get_boost(self, http_client: aiohttp.ClientSession, session_token):
-<<<<<<< HEAD
         additional_headers = {'X-Application-Version': self.app_version}
-=======
->>>>>>> dc8fde941444d9deda84b4ef6cdd071b48437c02
         urlencoded_data = {
             "session": session_token
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/user/boosts", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/user/boosts", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response.get('response'):
             return response
         return None
     
     @error_handler
     async def activate_boost(self, http_client: aiohttp.ClientSession, session_token, boost_id):
-<<<<<<< HEAD
         additional_headers = {'X-Application-Version': self.app_version}
-=======
->>>>>>> dc8fde941444d9deda84b4ef6cdd071b48437c02
         urlencoded_data = {
             "session": session_token,
             "boost_id": boost_id
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/boost/activate", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/boost/activate", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response.get("response", {}).get("success") == 1:
             return response
         return None
@@ -472,14 +451,8 @@ class Tapper:
                             for item in boost_data['response']['items']:
                                 boost_id = int(item['boost_id'])
                                 expires = int(item['expires']) or 0
-<<<<<<< HEAD
                                 
                                 if expires == 0 or current_time > expires:
-=======
-                                boost_count = int(item['count']) or 0
-                                
-                                if expires == 0 or current_time > expires and boost_count > 0:
->>>>>>> dc8fde941444d9deda84b4ef6cdd071b48437c02
                                     apply_boost = await self.activate_boost(http_client, session_token=session_token, boost_id=boost_id)
                                     if not apply_boost:
                                         logger.error(f"{self.session_name} | Unknown error while activating Boost!")
