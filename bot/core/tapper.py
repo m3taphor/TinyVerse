@@ -34,7 +34,7 @@ from .headers import headers
 
 from random import randint, choices
 
-from bot.utils.functions import gen_xapi, unix_convert
+from bot.utils.functions import unix_convert
 
 from ..utils.firstrun import append_line_to_file
 
@@ -55,6 +55,7 @@ class Tapper:
         self.start_param = ''
         self.bot_peer = 'tverse'
         self.bot_chatid = 7631205793
+        self.app_version = '0.7.18'
         self.theme_params = "{\"accent_text_color\":\"#6ab2f2\",\"bg_color\":\"#17212b\",\"bottom_bar_bg_color\":\"#17212b\",\"button_color\":\"#5288c1\",\"button_text_color\":\"#ffffff\",\"destructive_text_color\":\"#ec3942\",\"header_bg_color\":\"#17212b\",\"hint_color\":\"#708499\",\"link_color\":\"#6ab3f3\",\"secondary_bg_color\":\"#232e3c\",\"section_bg_color\":\"#17212b\",\"section_header_text_color\":\"#6ab3f3\",\"section_separator_color\":\"#111921\",\"subtitle_text_color\":\"#708499\",\"text_color\":\"#f5f5f5\"}"
         self.joined = None
         self.balance = 0
@@ -153,7 +154,7 @@ class Tapper:
             logger.info(f"{self.session_name} | Proxy IP : {ip} | Proxy Country : {country}")
         except Exception as error:
             logger.error(f"{self.session_name} | Proxy: {proxy} | Error: {error}")
-                   
+
     @error_handler
     async def make_request(
         self,
@@ -195,15 +196,36 @@ class Tapper:
         try:
             response = await http_client.request(method, full_url, headers=request_headers, **kwargs)
             response.raise_for_status()
-            response_json = await response.json()
-            return response_json
+            if settings.SAVE_RESPONSE_DATA:
+                response_data = ""
+                response_data += f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                response_data += f"Request URL: {full_url}\n"
+
+                if method == 'POST':
+                    request_body = kwargs.get('json', None)
+                    if request_body is not None:
+                        response_data += f"Request Body (JSON): {json.dumps(request_body, indent=2)}\n\n"
+                    else:
+                        request_body = kwargs.get('data', None)
+                        if request_body is not None:
+                            response_data += f"Request Body (Data): {request_body}\n\n"
+
+                response_data += f"Response Code: {response.status}\n"
+                response_data += f"Response Headers: {response.headers}\n"
+                response_data += f"Response Body: {await response.text()}\n"
+                response_data += "-" * 50 + "\n"
+            
+            with open("saved_data.txt", "a", encoding='utf8') as file:
+                file.write(response_data)
+                
+            return await response.json()
         except (aiohttp.ClientResponseError, aiohttp.ClientError, Exception) as error:
             logger.error(f"{self.session_name} | Unknown error when processing request: {error}")
             raise
-        
+    
     @error_handler
     async def login(self, http_client: aiohttp.ClientSession, init_data):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "bot_id": self.bot_chatid,
             "data": init_data
@@ -216,7 +238,7 @@ class Tapper:
 
     @error_handler
     async def user_data(self, http_client: aiohttp.ClientSession, session_token, id="undefined"):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token,
             "id": id
@@ -229,7 +251,7 @@ class Tapper:
     
     @error_handler
     async def get_galaxy(self, http_client: aiohttp.ClientSession, session_token, id="null", member_id="null"):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token,
             "id": id,
@@ -243,7 +265,7 @@ class Tapper:
     
     @error_handler
     async def begin_galaxy(self, http_client: aiohttp.ClientSession, session_token, stars, referral):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token,
             "stars": stars,
@@ -257,7 +279,7 @@ class Tapper:
     
     @error_handler
     async def collect_dust(self, http_client: aiohttp.ClientSession, session_token):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token
         }
@@ -269,7 +291,7 @@ class Tapper:
     
     @error_handler
     async def get_boost(self, http_client: aiohttp.ClientSession, session_token):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token
         }
@@ -281,7 +303,7 @@ class Tapper:
     
     @error_handler
     async def activate_boost(self, http_client: aiohttp.ClientSession, session_token, boost_id):
-        additional_headers = {'X-Api-Request-Id': gen_xapi()}
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token,
             "boost_id": boost_id
@@ -429,7 +451,7 @@ class Tapper:
                             for item in boost_data['response']['items']:
                                 boost_id = int(item['boost_id'])
                                 expires = int(item['expires']) or 0
-                                # print(f'Expire: {expires} | Current: {current_time} | Sum: {expires - current_time} | Thres: {expires + threshold}')
+                                
                                 if expires == 0 or current_time > expires:
                                     apply_boost = await self.activate_boost(http_client, session_token=session_token, boost_id=boost_id)
                                     if not apply_boost:

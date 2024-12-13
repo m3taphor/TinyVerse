@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     NIGHT_MODE: bool = False
     NIGHT_TIME: list[int] = [0, 7] #TIMEZONE = UTC, FORMAT = HOURS, [start, end]
     NIGHT_CHECKING: list[int] = [3600, 7200]
+    
+    SAVE_RESPONSE_DATA: bool = False
 
 settings = Settings()
 
