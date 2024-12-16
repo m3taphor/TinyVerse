@@ -144,18 +144,18 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 - `MAKE_GIFT_ALLOWED_USERNAME`: Specifies usernames that are permitted to create gift codes for stars. Allowed values: `["username"]` or `["username1", "username2"]`. To allow all usernames, use `["all"]`.
 - `MAKE_GIFT_RESTRICT_USERNAME`: Specifies usernames that are restricted from creating gift codes for stars. Allowed values: `["username"]` or `["username1", "username2"]`. To disable restrictions, use `[]`.
 
-> > [!NOTE]
-> > Gift codes that are "self-created" can be redeemed in the same account where they were generated. To manage this, use `MAKE_GIFT_RESTRICT_USERNAME` and `MAKE_GIFT_ALLOWED_USERNAME` before generating the code.
+> [!NOTE]
+> Gift codes that are "self-created" can be redeemed in the same account where they were generated. To manage this, use `MAKE_GIFT_RESTRICT_USERNAME` and `MAKE_GIFT_ALLOWED_USERNAME` before generating the code.
 
 - `GIFT_TO_USERNAME`: Specifies usernames to gift stars with a gift code. Allowed values: `["username"]` or, for multiple usernames, a random selection from `["username1", "username2"]`. Usernames can be added or edited after the code is generated and before it is redeemed in the `gift-code.json` file.
 
 **Gift Code Usage**
 
-> > [!NOTE]
-> > Ensure that the pyrogram `.session` file for the username is present in the `/sessions` folder.
+> [!NOTE]
+> Ensure that the pyrogram `.session` file for the username is present in the `/sessions` folder.
 
-> > [!TIP]
-> > Alternatively, you can manually redeem codes in Telegram by adding the gift code in the URL: `https://t.me/tverse?startapp=gift-XXXXXX`, where `XXXXXX` is your code.
+> [!TIP]
+> Alternatively, you can manually redeem codes in Telegram by adding the gift code in the URL: `https://t.me/tverse?startapp=gift-XXXXXX`, where `XXXXXX` is your code.
 
 - `AUTO_REDEEM_CODE`: Automatically redeems gift codes using the `gift-code.json` file. Allowed values: (`True`/`False`).
 
