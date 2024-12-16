@@ -105,6 +105,7 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 | **SUPPORT_AUTHOR**               |              Add random choice between `REF_KEY` & AUTHOR `REF_KEY` (by default - `True`)               |
 | **REF_KEY**                      |      Start with refer, ID which is after `startapp=` (eg. `galaxy-0001a845e80004f232c60000a43a7f`)      |
 | **TRACK_BOT_UPDATES**            |                             Track Changes in Bot API (by default - `True`)                              |
+| **MAX_REQUEST_RETRY**            |                          Max retry the ratelimited request (by default - `3`)                           |
 | **NIGHT_MODE**                   |                         Script will sleep on Night hours (by default - `False`)                         |
 | **NIGHT_TIME**                   |            [Night Mode]: Hours of sleep on UTC Timezone [start, end] (by default - `[0, 7]`)            |
 | **NIGHT_CHECKING**               |     [Night Mode]: Delay (in seconds) to check if night hours are over (by default - `[3600, 7200]`)     |
@@ -143,18 +144,18 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 - `MAKE_GIFT_ALLOWED_USERNAME`: Specifies usernames that are permitted to create gift codes for stars. Allowed values: `["username"]` or `["username1", "username2"]`. To allow all usernames, use `["all"]`.
 - `MAKE_GIFT_RESTRICT_USERNAME`: Specifies usernames that are restricted from creating gift codes for stars. Allowed values: `["username"]` or `["username1", "username2"]`. To disable restrictions, use `[]`.
 
->> [!NOTE]
-> Gift codes that are "self-created" can be redeemed in the same account where they were generated. To manage this, use `MAKE_GIFT_RESTRICT_USERNAME` and `MAKE_GIFT_ALLOWED_USERNAME` before generating the code.
+> > [!NOTE]
+> > Gift codes that are "self-created" can be redeemed in the same account where they were generated. To manage this, use `MAKE_GIFT_RESTRICT_USERNAME` and `MAKE_GIFT_ALLOWED_USERNAME` before generating the code.
 
 - `GIFT_TO_USERNAME`: Specifies usernames to gift stars with a gift code. Allowed values: `["username"]` or, for multiple usernames, a random selection from `["username1", "username2"]`. Usernames can be added or edited after the code is generated and before it is redeemed in the `gift-code.json` file.
 
 **Gift Code Usage**
 
->> [!NOTE]
-> Ensure that the pyrogram `.session` file for the username is present in the `/sessions` folder.
+> > [!NOTE]
+> > Ensure that the pyrogram `.session` file for the username is present in the `/sessions` folder.
 
->> [!TIP]
-> Alternatively, you can manually redeem codes in Telegram by adding the gift code in the URL: `https://t.me/tverse?startapp=gift-XXXXXX`, where `XXXXXX` is your code.
+> > [!TIP]
+> > Alternatively, you can manually redeem codes in Telegram by adding the gift code in the URL: `https://t.me/tverse?startapp=gift-XXXXXX`, where `XXXXXX` is your code.
 
 - `AUTO_REDEEM_CODE`: Automatically redeems gift codes using the `gift-code.json` file. Allowed values: (`True`/`False`).
 
@@ -165,17 +166,17 @@ Here's an example of the `gift-codes.json` file:
 
 ```json
 [
-    {
-        "incorrectCodes": [],
-        "usedCodes": [],
-        "generatedCodes": [
-         {
-            "code": "XXXXXXX",
-            "amount": 100,
-            "forUser": "username"
-        }
-        ]
-    }
+  {
+    "incorrectCodes": [],
+    "usedCodes": [],
+    "generatedCodes": [
+      {
+        "code": "XXXXXXX",
+        "amount": 100,
+        "forUser": "username"
+      }
+    ]
+  }
 ]
 ```
 
