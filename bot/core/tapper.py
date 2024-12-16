@@ -34,7 +34,7 @@ from .headers import headers
 
 from random import randint, choices
 
-from bot.utils.functions import unix_convert
+from bot.utils.functions import unix_convert, stars_count, getGiftCode, newGiftCode, errorGiftCode
 
 from ..utils.firstrun import append_line_to_file
 
@@ -119,14 +119,17 @@ class Tapper:
 
             auth_url = web_view.url
             tg_web_data = unquote(string=auth_url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0])
-
+            
+            user_data = unquote(tg_web_data.split('&user=')[1])
+            username = user_data.split('"username":"')[1].split('"')[0].lower() if '"username":"' in user_data else None
+            
             me = await self.tg_client.get_me()
             self.tg_client_id = me.id
             
             if self.tg_client.is_connected:
                 await self.tg_client.disconnect()
 
-            return ref_id, tg_web_data
+            return ref_id, tg_web_data, username
 
         except (Unauthorized, UserDeactivated, AuthKeyUnregistered, UserDeactivatedBan, AuthKeyDuplicated,
                 SessionExpired, SessionRevoked):
@@ -193,12 +196,17 @@ class Tapper:
             request_headers["Content-Type"] = "application/x-www-form-urlencoded; charset=UTF-8"
             kwargs["data"] = aiohttp.FormData(urlencoded_data)
 
-        try:
-            response = await http_client.request(method, full_url, headers=request_headers, **kwargs)
-            response.raise_for_status()
-            if settings.SAVE_RESPONSE_DATA:
+        retries = 0
+        max_retries = settings.MAX_REQUEST_RETRY
+        
+        while retries < max_retries:
+            try:
+                response = await http_client.request(method, full_url, headers=request_headers, **kwargs)
+                response.raise_for_status()
+                
+                if settings.SAVE_RESPONSE_DATA:
                     response_data = ""
-                    response_data += f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                    response_data += f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Session: {self.session_name}\n\n"
                     response_data += f"Request URL: {full_url}\n"
 
                     if method == 'POST':
@@ -217,11 +225,56 @@ class Tapper:
                     
                     with open("saved_data.txt", "a", encoding='utf8') as file:
                         file.write(response_data)
+                response_json = await response.json()
+                if (response_json.get("error", {}).get("code"), response_json.get("error", {}).get("text")) == (10429, "Too many requests"):
+                    retries += 1
+                    logger.warning(f"{self.session_name} | Received <r>'Too many requests</r>, retrying {retries}/{max_retries}...")
+                    await asyncio.sleep(2 ** retries)
+                    continue
+                else:
+                    return response_json
+            except aiohttp.ClientResponseError as error:
                 
-            return await response.json()
-        except (aiohttp.ClientResponseError, aiohttp.ClientError, Exception) as error:
-            logger.error(f"{self.session_name} | Unknown error when processing request: {error}")
-            raise
+                if settings.SAVE_RESPONSE_DATA:
+                    response_data = ""
+                    response_data += f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Session: {self.session_name}\n\n"
+                    response_data += f"Request URL: {full_url}\n"
+
+                    if method == 'POST':
+                        request_body = kwargs.get('json', None)
+                        if request_body is not None:
+                            response_data += f"Request Body (JSON): {json.dumps(request_body, indent=2)}\n\n"
+                        else:
+                            request_body = kwargs.get('data', None)
+                            if request_body is not None:
+                                response_data += f"Request Body (Data): {request_body}\n\n"
+
+                    response_data += f"Response Code: {error.status}\n"
+                    response_data += f"Response Headers: {dict(error.headers)}\n"
+                    response_data += f"Response Message: {await error.message}\n"
+                    response_data += "-" * 50 + "\n"
+                    
+                    with open("saved_data.txt", "a", encoding='utf8') as file:
+                        file.write(response_data)
+                        
+                if error.status == 503 or error.status == 500:
+                    retries += 1
+                    logger.warning(f"{self.session_name} | Received <r>{error.status}</r>, retrying {retries}/{max_retries}...")
+                    await asyncio.sleep(2 ** retries)
+                    continue
+                else:
+                    logger.error(f"{self.session_name} | HTTP error: {error}")
+                    raise
+            except (aiohttp.ClientError, Exception) as error:
+                logger.error(f"{self.session_name} | Unknown error when processing request: {error}")
+                raise
+        logger.error(f"{self.session_name} | Max retries reached for 'Server Un-Reachable' error.")
+        raise aiohttp.ClientResponseError(
+            request_info=None,
+            history=None,
+            status=503,
+            message="Max retries reached for 503 errors."
+        )
     
     @error_handler
     async def login(self, http_client: aiohttp.ClientSession, init_data):
@@ -313,6 +366,62 @@ class Tapper:
         if response.get("response", {}).get("success") == 1:
             return response
         return None
+    
+    @error_handler
+    async def create_stars(self, http_client: aiohttp.ClientSession, session_token, galaxy_id, stars):
+        urlencoded_data = {
+            "session": session_token,
+            "galaxy_id": galaxy_id,
+            "stars": stars
+        }
+        
+        response = await self.make_request(http_client, 'POST', endpoint="/stars/create", urlencoded_data=urlencoded_data)
+        if response.get("response", {}).get("success") == 1:
+            return response
+        return None
+    
+    @error_handler
+    async def create_gift(self, http_client: aiohttp.ClientSession, session_token, stars):
+        urlencoded_data = {
+            "session": session_token,
+            "stars": stars
+        }
+        response = await self.make_request(http_client, 'POST', endpoint="/gift/create", urlencoded_data=urlencoded_data)
+        if response.get("response", {}).get("success") == 1:
+            return response
+        return None
+    
+    @error_handler
+    async def get_gift(self, http_client: aiohttp.ClientSession, session_token, gift_id):
+        urlencoded_data = {
+            "session": session_token,
+            "gift_id": gift_id
+        }
+        
+        response = await self.make_request(http_client, 'POST', endpoint="/gift/get", urlencoded_data=urlencoded_data)
+        if response.get("response", {}).get("available") == True:
+            return response
+        elif response.get("response", {}).get("available") == False:
+            return 'used'
+        elif response.get("error", {}).get("code") == 10010:
+            return 'incorrect'
+        else:
+            return None
+    
+    @error_handler
+    async def redeem_gift(self, http_client: aiohttp.ClientSession, session_token, gift_id):
+        urlencoded_data = {
+            "session": session_token,
+            "gift_id": gift_id
+        }
+        
+        response = await self.make_request(http_client, 'POST', endpoint="/gift/accept", urlencoded_data=urlencoded_data)
+        if response.get("response", {}).get("success") == 1:
+            return 'self'
+        elif response.get("error", {}).get("code") == 10010:
+            return response
+        else:
+            return None
 
     async def run(self, user_agent: str, proxy: str | None) -> None:
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
@@ -344,7 +453,7 @@ class Tapper:
                     sleep_time = randint(settings.SLEEP_TIME[0], settings.SLEEP_TIME[1])
 
                     try:
-                        ref_id, init_data = await self.get_tg_web_data(proxy=proxy)
+                        ref_id, init_data, username = await self.get_tg_web_data(proxy=proxy)
                     except TelegramProxyError:
                         return logger.error(f"<r>The selected proxy cannot be applied to the Telegram client.</r>")
                     except Exception as e:
@@ -407,9 +516,59 @@ class Tapper:
                     galaxy_name = galaxy_data['response'].get('title') or None
                     created_on = int(galaxy_data['response'].get('created')) or 946684800
                     galaxy_day = unix_convert(created_on)
+                    galaxy_id = galaxy_data['response'].get('id') or None 
+                    
                     
                     logger.info(f"{self.session_name} | Current Galaxy: <y>{galaxy_name}</y> | Stars: <y>({total_stars}/{total_max_stars})</y> | Created on: <y>{galaxy_day}</y>")
                     await asyncio.sleep(random.randint(1, 3))
+                    
+                    # Auto Redeem Gift
+                    if settings.AUTO_REDEEM_CODE:
+                        gift_code = getGiftCode(username.lower())
+                        if gift_code:
+                            logger.info(f"{self.session_name} | Total Gift-Codes for <y>@{username}</y>: <y>{len(gift_code)}</y>. Initiating redemption...")
+
+                            successful_activations = 0
+
+                            for code in gift_code:
+                                code_info = await self.get_gift(http_client, session_token=session_token, gift_id=code)
+                                if not code_info:
+                                    logger.error(f"{self.session_name} | Unknown error while collecting Code Info!")
+                                    logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
+                                    await asyncio.sleep(delay=sleep_time)
+                                    continue
+                                
+                                if code_info == 'used' or code_info == 'incorrect':
+                                    logger.error(f"{self.session_name} | Skipping Code: <y>{code}</y> is {code_info}. Check 'gift-codes.json' for more info.")
+                                    errorGiftCode(code, code_info)
+                                    continue
+                                
+                                code_value = int(code_info['response'].get('value')) or 0
+                                code_sender = code_info['response'].get('sender') or None
+
+                                redeem_data = await self.redeem_gift(http_client, session_token=session_token, gift_id=code)
+                                if redeem_data == 'self':
+                                    logger.error(f"{self.session_name} | Skipping Code: <y>{code}</y>, Code is incorrect or self-made. Check 'gift-codes.json' for more info.")
+                                    errorGiftCode(code, 'incorrect')
+                                    continue
+                                if not redeem_data:
+                                    logger.error(f"{self.session_name} | Unknown error while Code Redeem!")
+                                    logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
+                                    await asyncio.sleep(delay=sleep_time)
+                                    continue
+                                
+                                successful_activations += 1
+                                logger.success(f"{self.session_name} | Code Applied: <g>{code}</g> | Stars: <g>+{code_value}</g> | Sender: <y>@{code_sender}</y>")
+                                errorGiftCode(code, 'used')
+
+                                if successful_activations % 5 == 0:
+                                    logger.info(f"{self.session_name} | Made {successful_activations} Successful 5 activations. Taking a break...")
+                                    await asyncio.sleep(random.randint(10, 15))
+                                else:
+                                    await asyncio.sleep(random.randint(3, 5))
+
+                            logger.info(f"{self.session_name} | All Gift-Codes processed!")
+                            await asyncio.sleep(random.randint(1, 3))
                     
                     # Collect Dust
                     if settings.AUTO_COLLECT_DUST:
@@ -432,8 +591,89 @@ class Tapper:
                             dust_collected = collect_dust['response'].get('dust') or 0
                             logger.success(f"{self.session_name} | Dust collected: <g>+{dust_collected}</g>")
                             
-                    await asyncio.sleep(random.randint(1, 3))
+                        await asyncio.sleep(random.randint(1, 3))
+                    
+                    # Auto Create Stars
+                    if settings.AUTO_CREATE_STAR:
+                        star_allowed_username = [item.replace('@', '').lower() for item in settings.MAKE_STARS_ALLOWED_USERNAME]
+                        star_restrict_username = [item.replace('@', '').lower() for item in settings.MAKE_STARS_RESTRICT_USERNAME]
                         
+                        if (username in star_allowed_username or 'all' in star_allowed_username) and username not in star_restrict_username:
+                            user_data = await self.user_data(http_client, session_token=session_token)
+                            if not user_data:
+                                logger.error(f"{self.session_name} | Unknown error while collecting User Data!")
+                                logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
+                                await asyncio.sleep(delay=sleep_time)
+                                break
+                            
+                            current_dust = int(user_data['response'].get('dust')) or 0
+                            total_dust = int(user_data['response'].get('dust_max')) or 0
+                            
+                            current_stars = int(user_data['response'].get('stars')) or 0
+                            total_stars = int(user_data['response'].get('stars_max')) or 0
+
+                            stars_value = stars_count(current_dust, current_stars)
+                            if stars_value > 100:
+                                if settings.USE_DUST_PERCENTAGE == 0:
+                                    dust_available = current_dust * 0.99
+                                else:
+                                    dust_available = (settings.USE_DUST_PERCENTAGE / 100) * total_dust * 0.99
+
+                                calculated_stars = stars_count(dust_available, current_stars)
+
+                                if calculated_stars > 100:
+                                    logger.info(f"{self.session_name} | Creating Stars...")
+                                    if galaxy_id:
+                                        stars_data = await self.create_stars(http_client, session_token=session_token, galaxy_id=galaxy_id, stars=calculated_stars)
+                                        if stars_data:
+                                            logger.success(f"{self.session_name} | Stars Created: <g>+{calculated_stars}</g>")
+                                            logger.info(f"{self.session_name} | Updated Dust: <y>({int(current_dust - dust_available)}/{total_dust})</y> | Updated Stars: <y>({current_stars + calculated_stars}/{total_stars})</y>")
+                                    else:
+                                        logger.error(f"{self.session_name} | Unable to find Galaxy-ID, Can not create Stars!")
+
+                        await asyncio.sleep(random.randint(1, 3))
+                    
+                    # Auto Gift Stars
+                    if settings.AUTO_GIFT_STAR:
+                        gift_allowed_username = [item.replace('@', '').lower() for item in settings.MAKE_GIFT_ALLOWED_USERNAME]
+                        gift_restrict_username = [item.replace('@', '').lower() for item in settings.MAKE_GIFT_RESTRICT_USERNAME]
+                        gift_to_username = [item.replace('@', '').lower() for item in settings.GIFT_TO_USERNAME]
+                        
+                        if (username in gift_allowed_username or 'all' in settings.MAKE_GIFT_ALLOWED_USERNAME) and username not in gift_restrict_username and username not in gift_to_username:
+                            user_data = await self.user_data(http_client, session_token=session_token)
+                            if not user_data:
+                                logger.error(f"{self.session_name} | Unknown error while collecting User Data!")
+                                logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
+                                await asyncio.sleep(delay=sleep_time)
+                                break
+                            
+                            current_dust = int(user_data['response'].get('dust')) or 0
+                            total_dust = int(user_data['response'].get('dust_max')) or 0
+                            current_stars = int(user_data['response'].get('stars')) or 0
+                            stars_value = stars_count(current_dust, current_stars)
+                            
+                            if stars_value > 100:
+                                if settings.GIFT_STAR_PERCENTAGE == 0:
+                                    dust_available = current_dust * 0.99
+                                else:
+                                    dust_available = (settings.GIFT_STAR_PERCENTAGE / 100) * total_dust * 0.99
+
+                                calculated_stars = stars_count(dust_available, current_stars)
+                                
+                                if calculated_stars > 100:
+                                    logger.info(f"{self.session_name} | Creating {calculated_stars} Stars Gift-Code...")
+                                    gift_data = await self.create_gift(http_client, session_token=session_token, stars=calculated_stars)
+                                    if gift_data:
+                                        gift_code = gift_data['response'].get('code')
+                                        for_username = random.choice(settings.GIFT_TO_USERNAME)
+                                        save_gift = newGiftCode(gift_code, for_username, calculated_stars)
+                                        if save_gift == True: 
+                                            logger.success(f"{self.session_name} | Gift-Code Created: <g>{gift_code}</g> for <y>@{for_username}</y>. You can edit JSON file and change Username.")
+                                            logger.info(f"{self.session_name} | Saved Gift-Code in 'gift-codes.json', Using in next login. You can change username in json file.")
+                                            logger.info(f"{self.session_name} | Updated Dust: <y>({int(current_dust - dust_available)}/{total_dust})</y>")
+                                        else:
+                                            logger.error(f"{self.session_name} | Error saving code: <y>{gift_code}</y> | Amount: <y>{calculated_stars} Stars</y> | Created By: <y>{username}</y>")
+                    
                     # Apply Boost
                     if settings.AUTO_APPLY_BOOST:
                         boost_data = await self.get_boost(http_client, session_token=session_token)
@@ -449,10 +689,12 @@ class Tapper:
                         
                         if total_boost > 0:
                             for item in boost_data['response']['items']:
-                                boost_id = int(item['boost_id'])
                                 expires = int(item['expires']) or 0
+                                boost_id = 0
+                                count = int(item['count']) or 0
                                 
-                                if expires == 0 or current_time > expires:
+                                if expires == 0 or current_time > expires and count > 0:
+                                    boost_id = int(item['boost_id'])
                                     apply_boost = await self.activate_boost(http_client, session_token=session_token, boost_id=boost_id)
                                     if not apply_boost:
                                         logger.error(f"{self.session_name} | Unknown error while activating Boost!")

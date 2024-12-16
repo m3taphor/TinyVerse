@@ -1,13 +1,12 @@
 import asyncio
 import argparse
 from random import randint
-from typing import Any
 from better_proxy import Proxy
 
-from bot.config import settings
 from bot.utils import logger
 from bot.core.tapper import run_tapper
 from bot.core.registrator import register_sessions, get_tg_client
+from bot.utils import build_check
 from bot.utils.accounts import Accounts
 from bot.utils.firstrun import load_session_names
 
@@ -17,7 +16,7 @@ def print_banner():
     \033[38;5;128m   |█▓'    ▓▓   ║▓╫ ▓▓N      ▓▓И  ╞▓▌ |╫▓   ┣▓┦ ▓▓N     \033[38;5;213m  [▓▓▌ 
     \033[38;5;128m    ▓█|    ╬▓   ┣▓╫ ▓█L,╥=,  ╫╫L_ Æ╣] ╘╨▓║P_  ' ▓█L,╥=, \033[38;5;213m  ╘║║╛ 
     \033[38;5;128m    ╫║     ┣▓▓__▓█╫ ║║Γ`""'  ▓▓Γ`┣▓   _     ▀█┳ ║║Γ`""' \033[38;5;213m   ▓▓  \033[37m- For education purpose
-    \033[38;5;128m    █▓|     ╡╬▓▓╡╡  ▓▓_      ▓█   ╘█▌ ╫╪L   _█╫ ▓▓_     \033[38;5;213m   ▀▀  \033[37m- Version: 1.5 (accounts.json edition)
+    \033[38;5;128m    █▓|     ╡╬▓▓╡╡  ▓▓_      ▓█   ╘█▌ ╫╪L   _█╫ ▓▓_     \033[38;5;213m   ▀▀  \033[37m- Version: 2.0 (accounts.json edition)
     \033[38;5;128m    ╘"'      "╘╘    ╘╘╘""""' ╘""   ╘╘  """""""  ╘╘╘""""'\033[38;5;213m   ╘╘  \033[37m- By [G.Hub]: \033[5m@m3taphor\033[38;5;135m
     \033[0m''')
 
@@ -62,6 +61,7 @@ async def process() -> None:
 
 
 async def run_tasks(accounts, used_session_names: str):
+    await build_check.check_base_url()
     tasks = []
     for account in accounts:
         session_name, user_agent, raw_proxy = account.values()
@@ -69,6 +69,7 @@ async def run_tasks(accounts, used_session_names: str):
         tg_client = await get_tg_client(session_name=session_name, proxy=raw_proxy)
         proxy = get_proxy(raw_proxy=raw_proxy)
         tasks.append(asyncio.create_task(run_tapper(tg_client=tg_client, user_agent=user_agent, proxy=proxy, first_run=first_run)))
+        tasks.append(asyncio.create_task(build_check.check_bot_update_loop(2000)))
         await asyncio.sleep(randint(5, 20))
 
     await asyncio.gather(*tasks)

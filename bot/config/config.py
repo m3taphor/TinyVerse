@@ -14,7 +14,20 @@ class Settings(BaseSettings):
     
     AUTO_APPLY_BOOST: bool = True
     EXTRA_BOOST_DELAY: list[int] = [100, 500]
-
+    
+    AUTO_REDEEM_CODE: bool = True
+    
+    AUTO_CREATE_STAR: bool = False
+    USE_DUST_PERCENTAGE: int = 90
+    MAKE_STARS_ALLOWED_USERNAME: list[str] = ["all"]
+    MAKE_STARS_RESTRICT_USERNAME: list[str] = []
+    
+    AUTO_GIFT_STAR: bool = False
+    GIFT_STAR_PERCENTAGE: int = 90
+    MAKE_GIFT_ALLOWED_USERNAME: list[str] = ["all"]
+    MAKE_GIFT_RESTRICT_USERNAME: list[str] = []
+    GIFT_TO_USERNAME: list[str] = []
+    
     SLEEP_TIME: list[int] = [2700, 4200]
     START_DELAY: list[int] = [5, 100]
     
@@ -25,7 +38,9 @@ class Settings(BaseSettings):
     NIGHT_TIME: list[int] = [0, 7] #TIMEZONE = UTC, FORMAT = HOURS, [start, end]
     NIGHT_CHECKING: list[int] = [3600, 7200]
     
-    SAVE_RESPONSE_DATA: bool = False
+    SAVE_RESPONSE_DATA: bool = True
+    MAX_REQUEST_RETRY: int = 3
+    TRACK_BOT_UPDATES: bool = True
 
 settings = Settings()
 

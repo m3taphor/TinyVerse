@@ -12,7 +12,7 @@
     <img src="https://i.ibb.co/Q6Lwvdt/photo-2024-11-18-23-50-52-modified.png" alt="TinyVerse Logo" width="100" height="100">
   </a>
 
-<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse</a></h3>
+<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse 2.0</a></h3>
   <p align="center">
     Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse</a> Farming Script
     <br />
@@ -36,6 +36,7 @@
       <ul>
         <li><a href="#obtain-telegram-api">Obtain Telegram API</a></li>
         <li><a href="#env-management">Env Management</a></li>
+        <li><a href="#stars-env-settings">Stars Env Settings</a></li>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#quick-start">Quick Start</a></li>
         <li><a href="#manual-installation">Manual Installation</a></li>
@@ -49,7 +50,7 @@
 
 ## About The Project
 
-[![TVerse][product-screenshot]](https://i.ibb.co/C8sbzRY/image.png)
+[![TVerse][product-screenshot]](https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f)
 
 An automated script/code made by @m3taphor on [Python 3.10](https://www.python.org/downloads/release/python-3100/) for [@tverse](https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f) or [@TVerseAppBot](https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f), built using TinyVerse (Tiny-Verse/TVerse) app APIs. It supports multiple sessions through [Pyrogram](https://github.com/pyrogram/pyrogram), with custom proxy support via an `accounts.json` configuration file.
 
@@ -62,11 +63,13 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
   - Proxy Binding
   - User-Agent Binding
 - Auto Login
-- Auto collect Offline Bonus
 - Auto Refer
+- Auto Create Stars
+- Auto Gift Stars
 - Auto Dust Collect
-- Auto create galaxy
+- Auto Apply Boosts
 - Night-Mode Sleep
+- Track Bot Updates
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -96,21 +99,87 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 
 ### Env Management
 
-| Settings                 |                                          Description (Usage)                                           |
-| ------------------------ | :----------------------------------------------------------------------------------------------------: |
-| **API_ID / API_HASH**    | API Keys of telegram. Use to manage accounts, tutorial: ([#obtain-telegram-api](#obtain-telegram-api)) |
-| **SUPPORT_AUTHOR**       |               Add random choice between `REF_KEY` & AUTHOR `REF_KEY` (by default - True)               |
-| **REF_KEY**              |     Start with refer, ID which is after `startapp=` (eg. `galaxy-0001a845e80004f232c60000a43a7f`)      |
-| **NIGHT_MODE**           |                         Script will sleep on Night hours (by default - False)                          |
-| **NIGHT_TIME**           |            [Night Mode]: Hours of sleep on UTC Timezone [start, end] (by default - [0, 7])             |
-| **NIGHT_CHECKING**       |     [Night Mode]: Delay (in seconds) to check if night hours are over (by default - [3600, 7200])      |
-| **AUTO_COLLECT_DUST**    |                           Auto collect Star dust of Galaxy (default - True)                            |
-| **AUTO_APPLY_BOOST**     |                               Auto apply remaning Boost (default - True)                               |
-| **EXTRA_BOOST_DELAY**    |               Delay after auto-collect Boost is Done before proceeding (default - [100, 500])                |
-| **AUTO_COLLECT_DUST**    |                           Auto collect Star dust of Galaxy (default - True)                            |
-| **SLEEP_TIME**           |           Sleep delay (in seconds) before restarting session again (default - [2700, 4200])            |
-| **START_DELAY**          |                        Delay (in seconds) to start process (default - [5, 100])                        |
-| **IN_USE_SESSIONS_PATH** |       Path of text file for appending in-use session (default - 'bot/config/used_sessions.txt')        |
+| Settings                         |                                           Description (Usage)                                           |
+| -------------------------------- | :-----------------------------------------------------------------------------------------------------: |
+| **API_ID / API_HASH**            | API Keys of telegram. Use to manage accounts, tutorial: ([#obtain-telegram-api](#obtain-telegram-api))  |
+| **SUPPORT_AUTHOR**               |              Add random choice between `REF_KEY` & AUTHOR `REF_KEY` (by default - `True`)               |
+| **REF_KEY**                      |      Start with refer, ID which is after `startapp=` (eg. `galaxy-0001a845e80004f232c60000a43a7f`)      |
+| **TRACK_BOT_UPDATES**            |                             Track Changes in Bot API (by default - `True`)                              |
+| **NIGHT_MODE**                   |                         Script will sleep on Night hours (by default - `False`)                         |
+| **NIGHT_TIME**                   |            [Night Mode]: Hours of sleep on UTC Timezone [start, end] (by default - `[0, 7]`)            |
+| **NIGHT_CHECKING**               |     [Night Mode]: Delay (in seconds) to check if night hours are over (by default - `[3600, 7200]`)     |
+| **AUTO_CREATE_STAR**             | Auto creates star from dust, tutorial: ([#stars-env-settings](#stars-env-settings))(default - `False`)  |
+| **USE_DUST_PERCENTAGE**          |                 [Stars]: Total percentage of dust use to create stars (default - `90`)                  |
+| **MAKE_STARS_ALLOWED_USERNAME**  |                     [Stars]: Allowed Username to create stars (default - `["all"]`)                     |
+| **MAKE_STARS_RESTRICT_USERNAME** |                       [Stars]: Restrict Username to create stars (default - `[]`)                       |
+| **AUTO_GIFT_STAR**               | Auto gift stars to username, tutorial: ([#stars-env-settings](#stars-env-settings)) (default - `False`) |
+| **GIFT_STAR_PERCENTAGE**         |                  [Gifts]: Total percentage of dust use to create gift (default - `90`)                  |
+| **MAKE_GIFT_ALLOWED_USERNAME**   |                   [Gifts]: Allowed Username to create gift code (default - `["all"]`)                   |
+| **MAKE_GIFT_RESTRICT_USERNAME**  |                     [Gifts]: Restrict Username to create gift code (default - `[]`)                     |
+| **GIFT_TO_USERNAME**             |                         [Gifts]: Username(s) to use gift code (default - `[]`)                          |
+| **AUTO_REDEEM_CODE**             |                        [Gifts]: Auto Redeem generated gift code (default - `[]`)                        |
+| **AUTO_COLLECT_DUST**            |                           Auto collect Star dust of Galaxy (default - `True`)                           |
+| **AUTO_APPLY_BOOST**             |                              Auto apply remaning Boost (default - `True`)                               |
+| **EXTRA_BOOST_DELAY**            |       [Boost]: Delay after auto-collect Boost is Done before proceeding (default - `[100, 500]`)        |
+| **SLEEP_TIME**                   |           Sleep delay (in seconds) before restarting session again (default - `[2700, 4200]`)           |
+| **START_DELAY**                  |                       Delay (in seconds) to start process (default - `[5, 100]`)                        |
+| **IN_USE_SESSIONS_PATH**         |        Path of text file for appending in-use session (default - `bot/config/used_sessions.txt`)        |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Stars Env Settings
+
+**Star Creation**
+
+- `AUTO_CREATE_STAR`: Enables automatic creation of stars from star dust. Allowed values: (`True`/`False`).
+- `USE_DUST_PERCENTAGE`: Specifies the percentage of dust required to create stars. For example, if set to `100`, stars will be created when the dust reaches the maximum capacity (e.g., _10000/10000_). Allowed values: (`1` to `100`). For minimal dust requirement or no percentage limit, use `0`.
+- `MAKE_STARS_ALLOWED_USERNAME`: Specifies usernames that are permitted to create stars. Allowed values: `["username"]` or `["username1", "username2"]`. To allow all usernames, use `["all"]`.
+- `MAKE_STARS_RESTRICT_USERNAME`: Specifies usernames that are restricted from creating stars. Allowed values: `["username"]` or `["username1", "username2"]`. To disable restrictions, use `[]`.
+
+**Gift Star Creation**
+
+- `AUTO_GIFT_STAR`: Enables automatic creation of gift codes for stars using star dust. Allowed values: (`True`/`False`).
+- `GIFT_STAR_PERCENTAGE`: Specifies the percentage of dust required to create gift codes for stars. For example, if set to `100`, gift codes will be created when the dust reaches the maximum capacity (e.g., _10000/10000_). Allowed values: (`1` to `100`). For minimal dust requirement or no percentage limit, use `0`.
+- `MAKE_GIFT_ALLOWED_USERNAME`: Specifies usernames that are permitted to create gift codes for stars. Allowed values: `["username"]` or `["username1", "username2"]`. To allow all usernames, use `["all"]`.
+- `MAKE_GIFT_RESTRICT_USERNAME`: Specifies usernames that are restricted from creating gift codes for stars. Allowed values: `["username"]` or `["username1", "username2"]`. To disable restrictions, use `[]`.
+
+>> [!NOTE]
+> Gift codes that are "self-created" can be redeemed in the same account where they were generated. To manage this, use `MAKE_GIFT_RESTRICT_USERNAME` and `MAKE_GIFT_ALLOWED_USERNAME` before generating the code.
+
+- `GIFT_TO_USERNAME`: Specifies usernames to gift stars with a gift code. Allowed values: `["username"]` or, for multiple usernames, a random selection from `["username1", "username2"]`. Usernames can be added or edited after the code is generated and before it is redeemed in the `gift-code.json` file.
+
+**Gift Code Usage**
+
+>> [!NOTE]
+> Ensure that the pyrogram `.session` file for the username is present in the `/sessions` folder.
+
+>> [!TIP]
+> Alternatively, you can manually redeem codes in Telegram by adding the gift code in the URL: `https://t.me/tverse?startapp=gift-XXXXXX`, where `XXXXXX` is your code.
+
+- `AUTO_REDEEM_CODE`: Automatically redeems gift codes using the `gift-code.json` file. Allowed values: (`True`/`False`).
+
+**Adding Gift Code manually**
+
+You can handle your gift code or add/change codes by editing the `gift-codes.json` file found in the main directory.
+Here's an example of the `gift-codes.json` file:
+
+```json
+[
+    {
+        "incorrectCodes": [],
+        "usedCodes": [],
+        "generatedCodes": [
+         {
+            "code": "XXXXXXX",
+            "amount": 100,
+            "forUser": "username"
+        }
+        ]
+    }
+]
+```
+
+In this file, ensure the codes are correct. The amount and username can be edited as needed.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -273,6 +342,6 @@ More Info on [LICENSE](https://github.com/m3taphor/TinyVerse/blob/main/LICENSE) 
 [license-url]: https://github.com/m3taphor/TinyVerse/blob/main/LICENSE
 [telegram-shield]: https://img.shields.io/badge/Telegram-29a9eb?style=for-the-badge&logo=telegram&logoColor=white
 [telegram-url]: https://telegram.me/m3taphor
-[product-screenshot]: https://i.ibb.co/C8sbzRY/image.png
+[product-screenshot]: https://i.ibb.co/LrSLGV3/image.png
 [Python.com]: https://img.shields.io/badge/python%203.10-3670A0?style=for-the-badge&logo=python&logoColor=ffffff
 [Python-url]: https://www.python.org/downloads/release/python-3100/
