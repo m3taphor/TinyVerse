@@ -1,19 +1,16 @@
 import asyncio
-import base64
 import json
 import shutil
 import os
 import random
-import re
 import datetime
 import brotli
 import functools
 import string
 
 from typing import Callable
-from multiprocessing.util import debug
 from time import time
-from urllib.parse import unquote, quote
+from urllib.parse import unquote
 
 import aiohttp
 from aiohttp_proxy import ProxyConnector
@@ -32,9 +29,9 @@ from bot.utils import logger
 from bot.exceptions import TelegramInvalidSessionException, TelegramProxyError
 from .headers import headers
 
-from random import randint, choices
+from random import randint
 
-from bot.utils.functions import unix_convert, stars_count, getGiftCode, newGiftCode, errorGiftCode
+from bot.utils.functions import unix_convert, stars_count, getGiftCode, errorGiftCode
 
 from ..utils.firstrun import append_line_to_file
 
@@ -54,7 +51,7 @@ class Tapper:
         self.session_name = tg_client.name
         self.bot_peer = 'tverse'
         self.bot_chatid = 7631205793
-        self.app_version = '0.7.25'
+        self.app_version = '0.7.26'
         self.theme_params = "{\"accent_text_color\":\"#6ab2f2\",\"bg_color\":\"#17212b\",\"bottom_bar_bg_color\":\"#17212b\",\"button_color\":\"#5288c1\",\"button_text_color\":\"#ffffff\",\"destructive_text_color\":\"#ec3942\",\"header_bg_color\":\"#17212b\",\"hint_color\":\"#708499\",\"link_color\":\"#6ab3f3\",\"secondary_bg_color\":\"#232e3c\",\"section_bg_color\":\"#17212b\",\"section_header_text_color\":\"#6ab3f3\",\"section_separator_color\":\"#111921\",\"subtitle_text_color\":\"#708499\",\"text_color\":\"#f5f5f5\"}"
         self.boost_translation = {
             1: "3h +20% Speed",
@@ -374,18 +371,7 @@ class Tapper:
         if response.get("response", {}).get("success") == 1:
             return response
         return None
-    
-    @error_handler
-    async def create_gift(self, http_client: aiohttp.ClientSession, session_token, stars):
-        urlencoded_data = {
-            "session": session_token,
-            "stars": stars
-        }
-        response = await self.make_request(http_client, 'POST', endpoint="/gift/create", urlencoded_data=urlencoded_data)
-        if response.get("response", {}).get("success") == 1:
-            return response
-        return None
-    
+
     @error_handler
     async def get_gift(self, http_client: aiohttp.ClientSession, session_token, gift_id):
         urlencoded_data = {
@@ -627,47 +613,6 @@ class Tapper:
                                         logger.error(f"{self.session_name} | Unable to find Galaxy-ID, Can not create Stars!")
 
                         await asyncio.sleep(random.randint(1, 3))
-                    
-                    # Auto Gift Stars
-                    if settings.AUTO_GIFT_STAR:
-                        gift_allowed_username = [item.replace('@', '').lower() for item in settings.MAKE_GIFT_ALLOWED_USERNAME]
-                        gift_restrict_username = [item.replace('@', '').lower() for item in settings.MAKE_GIFT_RESTRICT_USERNAME]
-                        gift_to_username = [item.replace('@', '').lower() for item in settings.GIFT_TO_USERNAME]
-                        
-                        if (username in gift_allowed_username or 'all' in settings.MAKE_GIFT_ALLOWED_USERNAME) and username not in gift_restrict_username and username not in gift_to_username:
-                            user_data = await self.user_data(http_client, session_token=session_token)
-                            if not user_data:
-                                logger.error(f"{self.session_name} | Unknown error while collecting User Data!")
-                                logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
-                                await asyncio.sleep(delay=sleep_time)
-                                break
-                            
-                            current_dust = int(user_data['response'].get('dust')) or 0
-                            total_dust = int(user_data['response'].get('dust_max')) or 0
-                            current_stars = int(user_data['response'].get('stars')) or 0
-                            stars_value = stars_count(current_dust, current_stars)
-                            
-                            if stars_value > 100:
-                                if settings.GIFT_STAR_PERCENTAGE == 0:
-                                    dust_available = current_dust * 0.99
-                                else:
-                                    dust_available = (settings.GIFT_STAR_PERCENTAGE / 100) * total_dust * 0.99
-
-                                calculated_stars = stars_count(dust_available, current_stars)
-                                
-                                if calculated_stars > 100:
-                                    logger.info(f"{self.session_name} | Creating {calculated_stars} Stars Gift-Code...")
-                                    gift_data = await self.create_gift(http_client, session_token=session_token, stars=calculated_stars)
-                                    if gift_data:
-                                        gift_code = gift_data['response'].get('code')
-                                        for_username = random.choice(settings.GIFT_TO_USERNAME)
-                                        save_gift = newGiftCode(gift_code, for_username, calculated_stars)
-                                        if save_gift == True: 
-                                            logger.success(f"{self.session_name} | Gift-Code Created: <g>{gift_code}</g> for <y>@{for_username}</y>. You can edit JSON file and change Username.")
-                                            logger.info(f"{self.session_name} | Saved Gift-Code in 'gift-codes.json', Using in next login. You can change username in json file.")
-                                            logger.info(f"{self.session_name} | Updated Dust: <y>({int(current_dust - dust_available)}/{total_dust})</y>")
-                                        else:
-                                            logger.error(f"{self.session_name} | Error saving code: <y>{gift_code}</y> | Amount: <y>{calculated_stars} Stars</y> | Created By: <y>{username}</y>")
                     
                     # Apply Boost
                     if settings.AUTO_APPLY_BOOST:

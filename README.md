@@ -113,11 +113,6 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 | **USE_DUST_PERCENTAGE**          |                 [Stars]: Total percentage of dust use to create stars (default - `90`)                  |
 | **MAKE_STARS_ALLOWED_USERNAME**  |                     [Stars]: Allowed Username to create stars (default - `["all"]`)                     |
 | **MAKE_STARS_RESTRICT_USERNAME** |                       [Stars]: Restrict Username to create stars (default - `[]`)                       |
-| **AUTO_GIFT_STAR**               | Auto gift stars to username, tutorial: ([#stars-env-settings](#stars-env-settings)) (default - `False`) |
-| **GIFT_STAR_PERCENTAGE**         |                  [Gifts]: Total percentage of dust use to create gift (default - `90`)                  |
-| **MAKE_GIFT_ALLOWED_USERNAME**   |                   [Gifts]: Allowed Username to create gift code (default - `["all"]`)                   |
-| **MAKE_GIFT_RESTRICT_USERNAME**  |                     [Gifts]: Restrict Username to create gift code (default - `[]`)                     |
-| **GIFT_TO_USERNAME**             |                         [Gifts]: Username(s) to use gift code (default - `[]`)                          |
 | **AUTO_REDEEM_CODE**             |                        [Gifts]: Auto Redeem generated gift code (default - `[]`)                        |
 | **AUTO_COLLECT_DUST**            |                           Auto collect Star dust of Galaxy (default - `True`)                           |
 | **AUTO_APPLY_BOOST**             |                              Auto apply remaning Boost (default - `True`)                               |
@@ -137,19 +132,10 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 - `MAKE_STARS_ALLOWED_USERNAME`: Specifies usernames that are permitted to create stars. Allowed values: `["username"]` or `["username1", "username2"]`. To allow all usernames, use `["all"]`.
 - `MAKE_STARS_RESTRICT_USERNAME`: Specifies usernames that are restricted from creating stars. Allowed values: `["username"]` or `["username1", "username2"]`. To disable restrictions, use `[]`.
 
-**Gift Star Creation**
-
-- `AUTO_GIFT_STAR`: Enables automatic creation of gift codes for stars using star dust. Allowed values: (`True`/`False`).
-- `GIFT_STAR_PERCENTAGE`: Specifies the percentage of dust required to create gift codes for stars. For example, if set to `100`, gift codes will be created when the dust reaches the maximum capacity (e.g., _10000/10000_). Allowed values: (`1` to `100`). For minimal dust requirement or no percentage limit, use `0`.
-- `MAKE_GIFT_ALLOWED_USERNAME`: Specifies usernames that are permitted to create gift codes for stars. Allowed values: `["username"]` or `["username1", "username2"]`. To allow all usernames, use `["all"]`.
-- `MAKE_GIFT_RESTRICT_USERNAME`: Specifies usernames that are restricted from creating gift codes for stars. Allowed values: `["username"]` or `["username1", "username2"]`. To disable restrictions, use `[]`.
-
-> [!NOTE]
-> Gift codes that are "self-created" can be redeemed in the same account where they were generated. To manage this, use `MAKE_GIFT_RESTRICT_USERNAME` and `MAKE_GIFT_ALLOWED_USERNAME` before generating the code.
-
-- `GIFT_TO_USERNAME`: Specifies usernames to gift stars with a gift code. Allowed values: `["username"]` or, for multiple usernames, a random selection from `["username1", "username2"]`. Usernames can be added or edited after the code is generated and before it is redeemed in the `gift-code.json` file.
-
 **Gift Code Usage**
+
+> [!WARNING]
+> Gift codes that are "self-created" can be redeemed in the same account where they were generated.
 
 > [!NOTE]
 > Ensure that the pyrogram `.session` file for the username is present in the `/sessions` folder.

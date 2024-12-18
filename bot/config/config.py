@@ -21,13 +21,7 @@ class Settings(BaseSettings):
     USE_DUST_PERCENTAGE: int = 90
     MAKE_STARS_ALLOWED_USERNAME: list[str] = ["all"]
     MAKE_STARS_RESTRICT_USERNAME: list[str] = []
-    
-    AUTO_GIFT_STAR: bool = False
-    GIFT_STAR_PERCENTAGE: int = 90
-    MAKE_GIFT_ALLOWED_USERNAME: list[str] = ["all"]
-    MAKE_GIFT_RESTRICT_USERNAME: list[str] = []
-    GIFT_TO_USERNAME: list[str] = []
-    
+
     SLEEP_TIME: list[int] = [2700, 4200]
     START_DELAY: list[int] = [5, 100]
     
