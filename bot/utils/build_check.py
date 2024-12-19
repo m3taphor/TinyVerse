@@ -55,9 +55,9 @@ async def check_base_url(press_key=True):
                         logger.success(f"No JS changes detected: <green>{last_actual_js}</green>")
                         return True
                 else:
-                    logger.error(f"<lr>Update Detected, Main JS Changed!</lr>")
+                    logger.error(f"<lr>Update Detected, Main JS Changed! Wait for the developer to update the file, or check the process. If you discover that there are no significant changes in the application, you can disable <y>TRACK_BOT_UPDATES</y> in the .env / .env-example file and continue as usual until the developer provides an update.</lr>")
                     logger.error(f"Main JS (Old): <lr>'{last_actual_js}'</lr> | Old hash: <lr>{last_actual_hash}</lr>")
-                    logger.warning(f"Main JS (New): <lg>'{js}'</lg> | Hash: '<lg>{await get_js_hash(js)}</lg>'")
+                    logger.warning(f"Main JS (New): <lg>'{js}'</lg> | New Hash: <lg>{await get_js_hash(js)}</lg>")
                     if press_key:
                         input("Bot updates detected. Contact me to check if it's safe to continue: https://t.me/m3taphor"
                               "\nPress 'Enter' to stop the bot...")
