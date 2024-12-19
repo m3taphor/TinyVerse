@@ -113,7 +113,6 @@ class Tapper:
             tg_web_data = unquote(string=auth_url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0])
             
             user_data = unquote(tg_web_data.split('&user=')[1])
-            print(user_data)
             username = user_data.split('"username":"')[1].split('"')[0].lower() if '"username":"' in user_data else 'null'
             
             me = await self.tg_client.get_me()
