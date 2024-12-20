@@ -69,6 +69,11 @@ async def check_base_url(press_key=True):
                 input("No main js file found. Contact me to check if it's safe to continue: https://t.me/m3taphor"
                       "\nPress 'Enter' to stop the bot...")
             sys.exit(logger.error("<r>Bot stopped due to a detected update in the JS file on the server.</r>"))
+            
+async def get_app_id():
+    tverse_files = await get_versions('tverse')
+    app_id = tverse_files.get('version')
+    return app_id
 
 async def check_bot_update_loop(start_delay: 0):
     await asyncio.sleep(start_delay)

@@ -45,13 +45,13 @@ def error_handler(func: Callable):
     return wrapper
 
 class Tapper:
-    def __init__(self, tg_client: Client, first_run: bool):
+    def __init__(self, tg_client: Client, first_run: bool, app_id: str):
         self.tg_client = tg_client
         self.first_run = first_run
         self.session_name = tg_client.name
         self.bot_peer = 'tverse'
         self.bot_chatid = 7631205793
-        self.app_version = '0.7.27'
+        self.app_version = app_id
         self.theme_params = "{\"accent_text_color\":\"#6ab2f2\",\"bg_color\":\"#17212b\",\"bottom_bar_bg_color\":\"#17212b\",\"button_color\":\"#5288c1\",\"button_text_color\":\"#ffffff\",\"destructive_text_color\":\"#ec3942\",\"header_bg_color\":\"#17212b\",\"hint_color\":\"#708499\",\"link_color\":\"#6ab3f3\",\"secondary_bg_color\":\"#232e3c\",\"section_bg_color\":\"#17212b\",\"section_header_text_color\":\"#6ab3f3\",\"section_separator_color\":\"#111921\",\"subtitle_text_color\":\"#708499\",\"text_color\":\"#f5f5f5\"}"
         self.boost_translation = {
             1: "3h +20% Speed",
@@ -361,6 +361,7 @@ class Tapper:
     
     @error_handler
     async def create_stars(self, http_client: aiohttp.ClientSession, session_token, galaxy_id, stars):
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token,
             "galaxy_id": galaxy_id,
@@ -374,6 +375,7 @@ class Tapper:
 
     @error_handler
     async def get_gift(self, http_client: aiohttp.ClientSession, session_token, gift_id):
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token,
             "gift_id": gift_id
@@ -391,6 +393,7 @@ class Tapper:
     
     @error_handler
     async def redeem_gift(self, http_client: aiohttp.ClientSession, session_token, gift_id):
+        additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token,
             "gift_id": gift_id
@@ -665,9 +668,9 @@ class Tapper:
                     logger.error(f"{self.session_name} | Unknown error: {error}")
                     await asyncio.sleep(delay=3)
 
-async def run_tapper(tg_client: Client, user_agent: str, proxy: str | None, first_run: bool):
+async def run_tapper(tg_client: Client, user_agent: str, proxy: str | None, first_run: bool, app_id: str):
     try:
-        await Tapper(tg_client=tg_client, first_run=first_run).run(user_agent=user_agent, proxy=proxy)
+        await Tapper(tg_client=tg_client, first_run=first_run, app_id=app_id).run(user_agent=user_agent, proxy=proxy)
     except TelegramInvalidSessionException:
         session_file = f"sessions/{tg_client.name}.session"
         if not os.path.exists("sessions/deleted_sessions"):

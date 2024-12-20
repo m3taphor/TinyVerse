@@ -62,13 +62,14 @@ async def process() -> None:
 
 async def run_tasks(accounts, used_session_names: str):
     await build_check.check_base_url()
+    app_id = await build_check.get_app_id()
     tasks = []
     for account in accounts:
         session_name, user_agent, raw_proxy = account.values()
         first_run = session_name not in used_session_names
         tg_client = await get_tg_client(session_name=session_name, proxy=raw_proxy)
         proxy = get_proxy(raw_proxy=raw_proxy)
-        tasks.append(asyncio.create_task(run_tapper(tg_client=tg_client, user_agent=user_agent, proxy=proxy, first_run=first_run)))
+        tasks.append(asyncio.create_task(run_tapper(tg_client=tg_client, user_agent=user_agent, proxy=proxy, first_run=first_run, app_id=app_id)))
         tasks.append(asyncio.create_task(build_check.check_bot_update_loop(2000)))
         await asyncio.sleep(randint(5, 20))
 
