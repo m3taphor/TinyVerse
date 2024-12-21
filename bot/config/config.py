@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     
     AUTO_CREATE_STAR: bool = False
     USE_DUST_PERCENTAGE: int = 90
+    SLIDER_STARS_VALUE: bool = True
     MAKE_STARS_ALLOWED_USERNAME: list[str] = ["all"]
     MAKE_STARS_RESTRICT_USERNAME: list[str] = []
 

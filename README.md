@@ -12,7 +12,7 @@
     <img src="https://i.ibb.co/Q6Lwvdt/photo-2024-11-18-23-50-52-modified.png" alt="TinyVerse Logo" width="100" height="100">
   </a>
 
-<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse 2.0</a></h3>
+<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse 2.7</a></h3>
   <p align="center">
     Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse</a> Farming Script
     <br />
@@ -66,6 +66,7 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 - Auto Refer
 - Auto Create Stars
 - Auto Gift Stars
+  - Slider Multiplier Value
 - Auto Dust Collect
 - Auto Apply Boosts
 - Night-Mode Sleep
@@ -99,27 +100,28 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 
 ### Env Management
 
-| Settings                         |                                           Description (Usage)                                           |
-| -------------------------------- | :-----------------------------------------------------------------------------------------------------: |
-| **API_ID / API_HASH**            | API Keys of telegram. Use to manage accounts, tutorial: ([#obtain-telegram-api](#obtain-telegram-api))  |
-| **SUPPORT_AUTHOR**               |              Add random choice between `REF_KEY` & AUTHOR `REF_KEY` (by default - `True`)               |
-| **REF_KEY**                      |      Start with refer, ID which is after `startapp=` (eg. `galaxy-0001a845e80004f232c60000a43a7f`)      |
-| **TRACK_BOT_UPDATES**            |                             Track Changes in Bot API (by default - `True`)                              |
-| **MAX_REQUEST_RETRY**            |                          Max retry the ratelimited request (by default - `3`)                           |
-| **NIGHT_MODE**                   |                         Script will sleep on Night hours (by default - `False`)                         |
-| **NIGHT_TIME**                   |            [Night Mode]: Hours of sleep on UTC Timezone [start, end] (by default - `[0, 7]`)            |
-| **NIGHT_CHECKING**               |     [Night Mode]: Delay (in seconds) to check if night hours are over (by default - `[3600, 7200]`)     |
-| **AUTO_CREATE_STAR**             | Auto creates star from dust, tutorial: ([#stars-env-settings](#stars-env-settings))(default - `False`)  |
-| **USE_DUST_PERCENTAGE**          |                 [Stars]: Total percentage of dust use to create stars (default - `90`)                  |
-| **MAKE_STARS_ALLOWED_USERNAME**  |                     [Stars]: Allowed Username to create stars (default - `["all"]`)                     |
-| **MAKE_STARS_RESTRICT_USERNAME** |                       [Stars]: Restrict Username to create stars (default - `[]`)                       |
-| **AUTO_REDEEM_CODE**             |                        [Gifts]: Auto Redeem generated gift code (default - `[]`)                        |
-| **AUTO_COLLECT_DUST**            |                           Auto collect Star dust of Galaxy (default - `True`)                           |
-| **AUTO_APPLY_BOOST**             |                              Auto apply remaning Boost (default - `True`)                               |
-| **EXTRA_BOOST_DELAY**            |       [Boost]: Delay after auto-collect Boost is Done before proceeding (default - `[100, 500]`)        |
-| **SLEEP_TIME**                   |           Sleep delay (in seconds) before restarting session again (default - `[2700, 4200]`)           |
-| **START_DELAY**                  |                       Delay (in seconds) to start process (default - `[5, 100]`)                        |
-| **IN_USE_SESSIONS_PATH**         |        Path of text file for appending in-use session (default - `bot/config/used_sessions.txt`)        |
+| Settings                         |                                          Description (Usage)                                           |
+| -------------------------------- | :----------------------------------------------------------------------------------------------------: |
+| **API_ID / API_HASH**            |             API Keys of telegram, tutorial: ([#obtain-telegram-api](#obtain-telegram-api))             |
+| **SUPPORT_AUTHOR**               |               Add random choice between `REF_KEY` & AUTHOR `REF_KEY` (default - `True`)                |
+| **REF_KEY**                      |     Start with refer, ID which is after `startapp=` (eg. `galaxy-0001a845e80004f232c60000a43a7f`)      |
+| **TRACK_BOT_UPDATES**            |                              Track Changes in Bot API (default - `True`)                               |
+| **MAX_REQUEST_RETRY**            |                           Max retry the ratelimited request (default - `3`)                            |
+| **NIGHT_MODE**                   |                          Script will sleep on Night hours (default - `False`)                          |
+| **NIGHT_TIME**                   |             [Night Mode]: Hours of sleep on UTC Timezone [start, end] (default - `[0, 7]`)             |
+| **NIGHT_CHECKING**               |      [Night Mode]: Delay (in seconds) to check if night hours are over (default - `[3600, 7200]`)      |
+| **AUTO_CREATE_STAR**             | Auto creates star from dust, tutorial: ([#stars-env-settings](#stars-env-settings))(default - `False`) |
+| **USE_DUST_PERCENTAGE**          |                 [Stars]: Total percentage of dust use to create stars (default - `90`)                 |
+| **SLIDER_STARS_VALUE**           |                     [Stars]: Use slider multiplier stars value (default - `True`)                      |
+| **MAKE_STARS_ALLOWED_USERNAME**  |                    [Stars]: Allowed Username to create stars (default - `["all"]`)                     |
+| **MAKE_STARS_RESTRICT_USERNAME** |                      [Stars]: Restrict Username to create stars (default - `[]`)                       |
+| **AUTO_REDEEM_CODE**             |                       [Gifts]: Auto Redeem generated gift code (default - `[]`)                        |
+| **AUTO_COLLECT_DUST**            |                          Auto collect Star dust of Galaxy (default - `True`)                           |
+| **AUTO_APPLY_BOOST**             |                              Auto apply remaning Boost (default - `True`)                              |
+| **EXTRA_BOOST_DELAY**            |       [Boost]: Delay after auto-collect Boost is Done before proceeding (default - `[100, 500]`)       |
+| **SLEEP_TIME**                   |          Sleep delay (in seconds) before restarting session again (default - `[2700, 4200]`)           |
+| **START_DELAY**                  |                       Delay (in seconds) to start process (default - `[5, 100]`)                       |
+| **IN_USE_SESSIONS_PATH**         |       Path of text file for appending in-use session (default - `bot/config/used_sessions.txt`)        |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

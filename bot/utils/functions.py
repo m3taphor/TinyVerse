@@ -1,15 +1,38 @@
 import json
 import datetime
+from bot.config import settings
+
+min_value, max_value, vmax = 100, 10000, 1000
+multipliers = {400: 0.1, 500: 0.15, 550: 0.2, 600: 0.25, 650: 0.35, 700: 0.45, 750: 0.55, 800: 0.65, 1000: 1}
+
+def calculate_amount(value):
+    multiplier = next((m for t, m in sorted(multipliers.items()) if value <= t), 1)
+    return round(min_value + (max_value - min_value) * multiplier * (value / vmax))
+
+def slider_amount(amount):
+    closest_amount, previous_amount, min_diff = calculate_amount(0), None, float('inf')
+    for value in range(vmax + 1):
+        calculated_amount = calculate_amount(value)
+        diff = abs(amount - calculated_amount)
+        if diff < min_diff:
+            previous_amount, min_diff, closest_amount = closest_amount, diff, calculated_amount
+    return previous_amount
+
+def stars_count(current_dust, current_stars):
+    per_star = current_stars / 70
+    calc_stars = int(current_dust / per_star)
+    
+    if settings.SLIDER_STARS_VALUE:
+        pre = slider_amount(calc_stars)
+        if pre >= 100:
+            return pre
+        
+    return calc_stars
 
 def unix_convert(unix: int):
     date_time = datetime.datetime.fromtimestamp(unix)
 
     return date_time.strftime('%b %d, %Y')
-
-def stars_count(current_dust, current_stars):
-    per_star = current_stars / 70
-    calc_stars = int(current_dust / per_star)
-    return calc_stars - (calc_stars % 10)
 
 def load_data(filePath):
     with open(filePath, 'r', encoding='utf8') as file:

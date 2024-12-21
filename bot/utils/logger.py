@@ -3,7 +3,7 @@ from loguru import logger
 
 
 logger.remove()
-logger.add(sink=sys.stdout, format="<white>TVerse 2.5</white>"
+logger.add(sink=sys.stdout, format="<white>TVerse 2.7</white>"
                                    " | <white>{time:YYYY-MM-DD HH:mm:ss}</white>"
                                    " | <level>{level: <8}</level>"
                                    " | <cyan><b>{line}</b></cyan>"

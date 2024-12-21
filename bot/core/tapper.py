@@ -368,7 +368,7 @@ class Tapper:
             "stars": stars
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/stars/create", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/stars/create", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response.get("response", {}).get("success") == 1:
             return response
         return None
@@ -381,7 +381,7 @@ class Tapper:
             "gift_id": gift_id
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/gift/get", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/gift/get", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response.get("response", {}).get("available") == True:
             return response
         elif response.get("response", {}).get("available") == False:
@@ -399,7 +399,7 @@ class Tapper:
             "gift_id": gift_id
         }
         
-        response = await self.make_request(http_client, 'POST', endpoint="/gift/accept", urlencoded_data=urlencoded_data)
+        response = await self.make_request(http_client, 'POST', endpoint="/gift/accept", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
         if response.get("response", {}).get("success") == 1:
             return 'self'
         elif response.get("error", {}).get("code") == 10010:
@@ -595,23 +595,23 @@ class Tapper:
                             
                             current_stars = int(user_data['response'].get('stars')) or 0
                             total_stars = int(user_data['response'].get('stars_max')) or 0
+                            
+                            if settings.USE_DUST_PERCENTAGE == 0:
+                                dust_available = current_dust
+                            else:
+                                dust_available = (settings.USE_DUST_PERCENTAGE / 100) * total_dust
+                            
+                            if current_dust >= dust_available:
+                                dustnow = current_dust
+                                stars_value = stars_count(current_dust, current_stars)
 
-                            stars_value = stars_count(current_dust, current_stars)
-                            if stars_value > 100:
-                                if settings.USE_DUST_PERCENTAGE == 0:
-                                    dust_available = current_dust * 0.99
-                                else:
-                                    dust_available = (settings.USE_DUST_PERCENTAGE / 100) * total_dust * 0.99
-
-                                calculated_stars = stars_count(dust_available, current_stars)
-
-                                if calculated_stars > 100:
-                                    logger.info(f"{self.session_name} | Creating Stars...")
+                                if stars_value > 100:
+                                    logger.info(f"{self.session_name} | Creating <y>{stars_value}</y> stars...")
                                     if galaxy_id:
-                                        stars_data = await self.create_stars(http_client, session_token=session_token, galaxy_id=galaxy_id, stars=calculated_stars)
+                                        stars_data = await self.create_stars(http_client, session_token=session_token, galaxy_id=galaxy_id, stars=stars_value)
                                         if stars_data:
-                                            logger.success(f"{self.session_name} | Stars Created: <g>+{calculated_stars}</g>")
-                                            logger.info(f"{self.session_name} | Updated Dust: <y>({int(current_dust - dust_available)}/{total_dust})</y> | Updated Stars: <y>({current_stars + calculated_stars}/{total_stars})</y>")
+                                            logger.success(f"{self.session_name} | Stars Created: <g>+{stars_value}</g>")
+                                            logger.info(f"{self.session_name} | Updated Dust: <y>({int(dustnow - current_dust)}/{total_dust})</y> | Updated Stars: <y>({current_stars + stars_value}/{total_stars})</y>")
                                     else:
                                         logger.error(f"{self.session_name} | Unable to find Galaxy-ID, Can not create Stars!")
 
