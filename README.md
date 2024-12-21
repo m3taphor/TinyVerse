@@ -145,7 +145,7 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 > [!TIP]
 > Alternatively, you can manually redeem codes in Telegram by adding the gift code in the URL: `https://t.me/tverse?startapp=gift-XXXXXX`, where `XXXXXX` is your code.
 
-- `AUTO_REDEEM_CODE`: Automatically redeems gift codes using the `gift-code.json` file. Allowed values: (`True`/`False`).
+- `AUTO_REDEEM_CODE`: Automatically redeems gift codes using the `gift-codes.json` file. Allowed values: (`True`/`False`).
 
 **Adding Gift Code manually**
 
