@@ -80,3 +80,9 @@ def errorGiftCode(code, type_):
         return None
     
     save_data('gift-codes.json', data)
+    
+def boostCount(total):
+    if total > 24:
+        return 24
+    else:
+        return int(total)

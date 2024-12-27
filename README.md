@@ -12,7 +12,7 @@
     <img src="https://i.ibb.co/Q6Lwvdt/photo-2024-11-18-23-50-52-modified.png" alt="TinyVerse Logo" width="100" height="100">
   </a>
 
-<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse 2.7</a></h3>
+<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse 2.8</a></h3>
   <p align="center">
     Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse</a> Farming Script
     <br />

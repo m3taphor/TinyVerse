@@ -31,7 +31,7 @@ from .headers import headers
 
 from random import randint
 
-from bot.utils.functions import unix_convert, stars_count, getGiftCode, errorGiftCode
+from bot.utils.functions import unix_convert, stars_count, getGiftCode, errorGiftCode, boostCount
 
 from ..utils.firstrun import append_line_to_file
 
@@ -54,10 +54,9 @@ class Tapper:
         self.app_version = app_id
         self.theme_params = "{\"accent_text_color\":\"#6ab2f2\",\"bg_color\":\"#17212b\",\"bottom_bar_bg_color\":\"#17212b\",\"button_color\":\"#5288c1\",\"button_text_color\":\"#ffffff\",\"destructive_text_color\":\"#ec3942\",\"header_bg_color\":\"#17212b\",\"hint_color\":\"#708499\",\"link_color\":\"#6ab3f3\",\"secondary_bg_color\":\"#232e3c\",\"section_bg_color\":\"#17212b\",\"section_header_text_color\":\"#6ab3f3\",\"section_separator_color\":\"#111921\",\"subtitle_text_color\":\"#708499\",\"text_color\":\"#f5f5f5\"}"
         self.boost_translation = {
-            1: "3h +20% Speed",
-            2: "12h +50% Speed",
-            3: "3h Auto-Collect",
-            4: "12h Auto-Collect"
+            1: "+20% Speed",
+            2: "+50% Speed",
+            3: "Auto Collect",
         }
 
     async def get_tg_web_data(self, proxy: str | None) -> str:
@@ -347,11 +346,12 @@ class Tapper:
         return None
     
     @error_handler
-    async def activate_boost(self, http_client: aiohttp.ClientSession, session_token, boost_id):
+    async def activate_boost(self, http_client: aiohttp.ClientSession, session_token, boost_id, boost_count):
         additional_headers = {'X-Application-Version': self.app_version}
         urlencoded_data = {
             "session": session_token,
-            "boost_id": boost_id
+            "boost_id": boost_id,
+            "count": boost_count
         }
         
         response = await self.make_request(http_client, 'POST', endpoint="/boost/activate", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
@@ -638,7 +638,8 @@ class Tapper:
                                 
                                 if expires == 0 or current_time > expires and count > 0:
                                     boost_id = int(item['boost_id'])
-                                    apply_boost = await self.activate_boost(http_client, session_token=session_token, boost_id=boost_id)
+                                    boost_count = boostCount(total=count)
+                                    apply_boost = await self.activate_boost(http_client, session_token=session_token, boost_id=boost_id, boost_count=boost_count)
                                     if not apply_boost:
                                         logger.error(f"{self.session_name} | Unknown error while activating Boost!")
                                         logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
@@ -647,10 +648,8 @@ class Tapper:
                                     
                                     logger.success(f"{self.session_name} | Boost Activated <y>{boost_id}</y>: <g>({self.boost_translation.get(boost_id, 'N/A')})</g>")
                                 
-                                if boost_id == 4:  # 12 Hours boost
-                                    boost_delay = max(boost_delay, 12 * 60 * 60)
-                                elif boost_id == 3:  # 3 Hours boost
-                                    boost_delay = max(boost_delay, 3 * 60 * 60)
+                                if boost_id == 3:  # 3 Hours boost
+                                    boost_delay = max(boost_delay, boost_count * 60 * 60)
                                 
                                 await asyncio.sleep(random.randint(1, 3))
                         if boost_delay > 0:
