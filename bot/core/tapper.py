@@ -646,7 +646,7 @@ class Tapper:
                                         await asyncio.sleep(delay=sleep_time)
                                         break
                                     
-                                    logger.success(f"{self.session_name} | Boost Activated <y>{boost_id}</y>: <g>({self.boost_translation.get(boost_id, 'N/A')})</g>")
+                                    logger.success(f"{self.session_name} | Boost Activated: <g>{boost_count} hours ({self.boost_translation.get(boost_id, 'N/A')})</g>")
                                 
                                 if boost_id == 3:  # 3 Hours boost
                                     boost_delay = max(boost_delay, boost_count * 60 * 60)
