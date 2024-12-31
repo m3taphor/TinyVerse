@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     SLIDER_STARS_VALUE: bool = True
     MAKE_STARS_ALLOWED_USERNAME: list[str] = ["all"]
     MAKE_STARS_RESTRICT_USERNAME: list[str] = []
+    
+    AUTO_COLLECT_NEEDLE: bool = True
+    MAX_SEARCH_TRIES: int = 15
 
     SLEEP_TIME: list[int] = [2700, 4200]
     START_DELAY: list[int] = [5, 100]

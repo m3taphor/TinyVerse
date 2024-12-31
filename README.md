@@ -12,7 +12,7 @@
     <img src="https://i.ibb.co/Q6Lwvdt/photo-2024-11-18-23-50-52-modified.png" alt="TinyVerse Logo" width="100" height="100">
   </a>
 
-<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse 2.8</a></h3>
+<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse 3.0</a></h3>
   <p align="center">
     Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse</a> Farming Script
     <br />
@@ -68,6 +68,9 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 - Auto Gift Stars
   - Slider Multiplier Value
 - Auto Dust Collect
+- Stars Tree Event (Needles)
+  - Auto Search Galaxy
+  - Auto Collect Stars
 - Auto Apply Boosts
 - Night-Mode Sleep
 - Track Bot Updates
@@ -117,6 +120,8 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 | **MAKE_STARS_RESTRICT_USERNAME** |                      [Stars]: Restrict Username to create stars (default - `[]`)                       |
 | **AUTO_REDEEM_CODE**             |                       [Gifts]: Auto Redeem generated gift code (default - `[]`)                        |
 | **AUTO_COLLECT_DUST**            |                          Auto collect Star dust of Galaxy (default - `True`)                           |
+| **AUTO_COLLECT_NEEDLE**          |                 Auto collect Stars from Tree Galaxy(Needles Update) (default - `True`)                 |
+| **MAX_SEARCH_TRIES**             |                      [Event]: Max Tries to search random galaxy (default - `15`)                       |
 | **AUTO_APPLY_BOOST**             |                              Auto apply remaning Boost (default - `True`)                              |
 | **EXTRA_BOOST_DELAY**            |       [Boost]: Delay after auto-collect Boost is Done before proceeding (default - `[100, 500]`)       |
 | **SLEEP_TIME**                   |          Sleep delay (in seconds) before restarting session again (default - `[2700, 4200]`)           |
