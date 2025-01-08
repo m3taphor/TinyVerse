@@ -58,7 +58,6 @@ class Tapper:
             2: "+50% Speed",
             3: "Auto Collect",
         }
-        self.allow_needle = True
 
     async def get_tg_web_data(self, proxy: str | None) -> str:
         if proxy:
@@ -407,31 +406,6 @@ class Tapper:
             return 'self'
         else:
             return None
-    
-    @error_handler
-    async def random_galaxy(self, http_client: aiohttp.ClientSession, session_token):
-        additional_headers = {'X-Application-Version': self.app_version}
-        urlencoded_data = {
-            "session": session_token
-        }
-        
-        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/random", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
-        if response.get("response", {}).get("id"):
-            return response
-        return None
-    
-    @error_handler
-    async def collect_needle(self, http_client: aiohttp.ClientSession, session_token, galaxy_id):
-        additional_headers = {'X-Application-Version': self.app_version}
-        urlencoded_data = {
-            "session": session_token,
-            "galaxy_id": galaxy_id
-        }
-        
-        response = await self.make_request(http_client, 'POST', endpoint="/galaxy/needles", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
-        if response.get("response", {}).get("success") == 1:
-            return response
-        return None
 
     async def run(self, user_agent: str, proxy: str | None) -> None:
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
@@ -642,45 +616,7 @@ class Tapper:
                                         logger.error(f"{self.session_name} | Unable to find Galaxy-ID, Can not create Stars!")
 
                         await asyncio.sleep(random.randint(1, 3))
-                    
-                    # Collect Needle
-                    if settings.AUTO_COLLECT_NEEDLE:
-                        galaxy_tries = 0
-                        while galaxy_tries < settings.MAX_SEARCH_TRIES:
-                            rnd_galaxy = await self.random_galaxy(http_client, session_token=session_token)
-                            if not rnd_galaxy:
-                                logger.error(f"{self.session_name} | Unknown error while collecting Random Galaxy Data!")
-                                logger.info(f"{self.session_name} | Sleep <y>{round(sleep_time / 60, 1)}</y> min")
-                                await asyncio.sleep(delay=sleep_time)
-                                break
-                            
-                            galaxy_idx = rnd_galaxy['response'].get('id')
-                            galaxy_title = rnd_galaxy['response'].get('title')
-                            stars = int(rnd_galaxy['response'].get('stars'))
-                            reroll = int(rnd_galaxy['response'].get('reroll'))
-                            member = rnd_galaxy['response'].get('member')
-                            needles = int(rnd_galaxy['response'].get('needles'))
-                            
-                            if stars == 100000 and reroll == 1000000 and member is None:
-                                if needles == 0:
-                                    logger.info(f"{self.session_name} | Max Needles limit of day is over.")
-                                    break
-                                if needles > 0:
-                                    logger.success(f"{self.session_name} | Event Galaxy Found: <g>{galaxy_title}</g>, Collecting Needle...")
-                                    await asyncio.sleep(random.randint(1, 3))
-                                    needle_data = await self.collect_needle(http_client, session_token=session_token, galaxy_id=galaxy_idx)
-                                    if needle_data:
-                                        logger.success(f"{self.session_name} | Stars Collected: <g>+{needle_data['response'].get('stars')}</g>")
-                                        galaxy_tries = 0
-                            
-                            else:
-                                logger.info(f"{self.session_name} | Galaxy Found: <y>{galaxy_title}</y>. Retrying <y>({galaxy_tries}/{settings.MAX_SEARCH_TRIES})</y>...")
-                                galaxy_tries += 1
-                            
-                            await asyncio.sleep(random.randint(1, 3))
-                            continue
-                            
-                    
+
                     # Apply Boost
                     if settings.AUTO_APPLY_BOOST:
                         boost_data = await self.get_boost(http_client, session_token=session_token)
