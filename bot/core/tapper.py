@@ -88,7 +88,7 @@ class Tapper:
                     logger.warning(f"{self.session_name} | FloodWait {fl}")
                     logger.info(f"{self.session_name} | Sleep {fls}s")
                     await asyncio.sleep(fls + 3)
-            ref_key = random.choice([settings.REF_KEY, "galaxy-0001a845e80004f232c60000a43a7f"]) if settings.SUPPORT_AUTHOR else settings.REF_KEY
+            ref_key = random.choice([settings.REF_KEY, "galaxy-0003f55f8700024ba9d90003b65e7a"]) if settings.SUPPORT_AUTHOR else settings.REF_KEY
             ref_id = ref_key.removeprefix("galaxy-")
             
             web_view = await self.tg_client.invoke(functions.messages.RequestWebView(

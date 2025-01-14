@@ -104,7 +104,7 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 | -------------------------------- | :----------------------------------------------------------------------------------------------------: |
 | **API_ID / API_HASH**            |             API Keys of telegram, tutorial: ([#obtain-telegram-api](#obtain-telegram-api))             |
 | **SUPPORT_AUTHOR**               |               Add random choice between `REF_KEY` & AUTHOR `REF_KEY` (default - `True`)                |
-| **REF_KEY**                      |     Start with refer, ID which is after `startapp=` (eg. `galaxy-0001a845e80004f232c60000a43a7f`)      |
+| **REF_KEY**                      |     Start with refer, ID which is after `startapp=` (eg. `galaxy-0003f55f8700024ba9d90003b65e7a`)      |
 | **TRACK_BOT_UPDATES**            |                              Track Changes in Bot API (default - `True`)                               |
 | **MAX_REQUEST_RETRY**            |                           Max retry the ratelimited request (default - `3`)                            |
 | **NIGHT_MODE**                   |                          Script will sleep on Night hours (default - `False`)                          |
