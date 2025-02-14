@@ -1,0 +1,16 @@
+aiofiles==24.1.0
+aiohttp==3.9.5
+aiocfscrape==1.0.0
+aiohttp-proxy==0.1.2
+asyncio==3.4.3
+better-proxy==1.2.0
+certifi
+fasteners
+loguru==0.7.2
+opentele==1.15.1
+pydantic-settings==2.4.0
+pyrogram==2.0.106
+PySocks==1.7.1
+python-socks==2.5.1
+Telethon==1.36.0
+ua_generator
