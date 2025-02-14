@@ -94,7 +94,7 @@ def boostCount(total):
     else:
         return int(total)
 
-def scan_chance(power, stars, scan_chance):
+def calc_scan_chance(power, stars, scan_chance):
     coef = 11 ** -12
     power *= 10000
     effective_stars = min(stars, 100000)

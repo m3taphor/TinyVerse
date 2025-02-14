@@ -12,7 +12,7 @@
     <img src="https://i.ibb.co/Q6Lwvdt/photo-2024-11-18-23-50-52-modified.png" alt="TinyVerse Logo" width="100" height="100">
   </a>
 
-<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse</a> 3.5</h3>
+<h3 align="center">Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse</a> 4.0</h3>
   <p align="center">
     Auto <a href="https://t.me/TVerse?startapp=galaxy-0001a845e80004f232c60000a43a7f">@TVerse</a> Farming Script
     <br />
@@ -70,6 +70,7 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
   - Slider Multiplier Value
 - Auto Dust Collect
 - Auto Apply Boosts
+- Auto Scan Civilizations
 - Night-Mode Sleep
 - Track Bot Updates
 
@@ -117,7 +118,9 @@ An automated script/code made by @m3taphor on [Python 3.10](https://www.python.o
 | **MAKE_STARS_ALLOWED_USERNAME**  | [Stars]: Allowed Username to create stars (default - `["all"]`)                                                                                                                  |
 | **MAKE_STARS_RESTRICT_USERNAME** | [Stars]: Restrict Username to create stars (default - `[]`)                                                                                                                      |
 | **AUTO_APPLY_BOOST**             | Auto apply remaining boosts (default - `True`).                                                                                                                                  |
-| **EXTRA_BOOST_DELAY**            | Delay (in seconds) after auto boosts time ends (default - `[100, 500]`).                                                                                                         |
+| **EXTRA_BOOST_DELAY**            | [Boost]: Delay (in seconds) after auto boosts time ends (default - `[100, 500]`).                                                                                                         |
+| **AUTO_SCAN**             | Auto Scan Civilization (default - `False`).                                                                                                                            |
+| **SCAN_PERCENTAGE**             | [Scan]: Scan Chance Percentage (default - `10`).                                                                                                                            |
 | **AUTO_REDEEM_CODE**             | Auto redeem generated gift codes (default - `False`).                                                                                                                            |
 | **NIGHT_MODE**                   | Enable script sleep during night hours (default - `False`).                                                                                                                      |
 | **NIGHT_TIME**                   | [Night Mode]: Night mode hours in UTC timezone (format: `[start, end]`, default - `[0, 7]`).                                                                                     |

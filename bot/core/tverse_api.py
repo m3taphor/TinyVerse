@@ -199,9 +199,9 @@ class TverseAPI:
         if response.get("response", {}).get("available") == True:
             return response
         elif response.get("response", {}).get("available") == False:
-            return 'used'
+            return response
         elif response.get("error", {}).get("code") == 10010:
-            return 'incorrect'
+            return response
         else:
             return None
 
@@ -217,6 +217,64 @@ class TverseAPI:
         if response.get("response", {}).get("success") == 1:
             return response
         elif response.get("error", {}).get("code") == 10010:
-            return 'self'
+            return response
+        else:
+            return None
+
+    @error_handler
+    async def get_civilization(self, http_client: aiohttp.ClientSession, session_token, galaxy_id):
+        additional_headers = {'X-Application-Version': self.app_version, 'X-Client-Time-Diff': unix_time()}
+        urlencoded_data = {
+            "session": session_token,
+            "civilization_id": None,
+            "galaxy_id": galaxy_id
+        }
+        
+        response = await self.make_request(http_client, 'POST', endpoint="/civilization/get", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
+        if response.get("response", {}):
+            return response
+        else:
+            return None
+
+    
+    @error_handler
+    async def scan_status(self, http_client: aiohttp.ClientSession, session_token):
+        additional_headers = {'X-Application-Version': self.app_version, 'X-Client-Time-Diff': unix_time()}
+        urlencoded_data = {
+            "session": session_token
+        }
+        
+        response = await self.make_request(http_client, 'POST', endpoint="/scan/status", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
+        if response.get("response", {}).get("status") == True:
+            return response
+        else:
+            return None
+        
+    @error_handler
+    async def scan_start(self, http_client: aiohttp.ClientSession, session_token, galaxy_id, power):
+        additional_headers = {'X-Application-Version': self.app_version, 'X-Client-Time-Diff': unix_time()}
+        urlencoded_data = {
+            "session": session_token,
+            "galaxy_id": galaxy_id,
+            "power": power
+        }
+        
+        response = await self.make_request(http_client, 'POST', endpoint="/scan/start", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
+        if response.get("response", {}).get("success") == 1:
+            return response
+        else:
+            return None
+        
+    @error_handler
+    async def scan_result(self, http_client: aiohttp.ClientSession, session_token, galaxy_id):
+        additional_headers = {'X-Application-Version': self.app_version, 'X-Client-Time-Diff': unix_time()}
+        urlencoded_data = {
+            "session": session_token,
+            "galaxy_id": galaxy_id
+        }
+        
+        response = await self.make_request(http_client, 'POST', endpoint="/scan/result", urlencoded_data=urlencoded_data, extra_headers=additional_headers)
+        if response.get("response", {}):
+            return response
         else:
             return None

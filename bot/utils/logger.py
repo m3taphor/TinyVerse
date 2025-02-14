@@ -5,7 +5,7 @@ from datetime import date
 
 logger.remove()
 
-logger.add(sink=sys.stdout, format="TVerse 3.5 | <light-white>{time:YYYY-MM-DD HH:mm:ss}</light-white>"
+logger.add(sink=sys.stdout, format="TVerse 4.0 | <light-white>{time:YYYY-MM-DD HH:mm:ss}</light-white>"
                                    " | <level>{level}</level>"
                                    " | <light-white><b>{message}</b></light-white>",
            filter=lambda record: record["level"].name != "TRACE")

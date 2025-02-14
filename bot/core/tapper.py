@@ -1,5 +1,6 @@
 import os
 import ssl
+import math
 import random
 import shutil
 import aiohttp
@@ -14,7 +15,7 @@ from random import randint
 from time import time
 
 from bot.utils.auth_token import append_token, get_token
-from bot.utils.functions import unix_convert, getGiftCode, errorGiftCode, stars_count, boostCount
+from bot.utils.functions import calc_scan_chance, unix_convert, getGiftCode, errorGiftCode, stars_count, boostCount
 from bot.utils.universal_telegram_client import UniversalTelegramClient
 
 from .headers import *
@@ -160,6 +161,9 @@ class Tapper:
                     total_dust = user_data['response'].get('dust_max') or 0
                     current_dust = user_data['response'].get('dust') or 0
                     awards = user_data['response'].get('awards') or 0
+
+                    allow_scan = user_data['response'].get('is_scan_available') or False
+                    scan_chance = float(user_data['response']['effects'].get('scan_chance')) or 0
                     
                     logger.info(f"{self.session_name} | Galaxy: <y>{total_galaxy}</y> | Total Dust: <y>({current_dust}/{total_dust})</y> | Achievements: <y>{awards}</y>")
                     await asyncio.sleep(random.randint(1, 3))
@@ -192,7 +196,65 @@ class Tapper:
                     galaxy_day = unix_convert(created_on)
                     galaxy_id = galaxy_data['response'].get('id') or None
 
+                    scan_stat = galaxy_data['response'].get('scan') or None 
+                    civilization = int(galaxy_data['response'].get('civilization')) or 0
+
                     logger.info(f"{self.session_name} | Current Galaxy: <y>{galaxy_name}</y> | Stars: <y>({total_stars}/{total_max_stars})</y> | Created on: <y>{galaxy_day}</y>")
+                    await asyncio.sleep(random.randint(1, 3))
+
+                    # Civilization Info
+                    if civilization > 0:
+                        civilization_data = await api.get_civilization(http_client, session_token=self.auth_token, galaxy_id=galaxy_id)
+
+                        if not civilization_data:
+                            logger.warning(f"{self.session_name} | Failed to get Civilization Info. Retrying in 5 minutes.")
+                            await asyncio.sleep(300)
+                            continue
+
+                        ctitle = civilization_data['response'].get('title') or None
+                        cpopulation = civilization_data['response'].get('population') or 0
+                        cpopulationmax = civilization_data['response'].get('population_max') or 0
+
+                        logger.info(f"{self.session_name} | Total Civilizations: <y>{civilization}</y> | Title: <y>{ctitle}</y> | Population: <y>({cpopulation}/{cpopulationmax})</y>")
+                    
+                    # Scan Results
+                    if scan_stat is not None:
+                        scan_exp = int(scan_stat.get('expires'))
+                        if int(time()) > scan_exp:
+                            scan_result = await api.scan_result(http_client, session_token=self.auth_token, galaxy_id=galaxy_id)
+
+                            if not scan_result:
+                                logger.warning(f"{self.session_name} | Failed to get Scan Results. Retrying in 5 minutes.")
+                                await asyncio.sleep(300)
+                                continue
+
+                            cscan = scan_result['response'].get('scan_result') or None
+                            if cscan == None:
+                                logger.info(f"{self.session_name} | Scan Results: No Civilizations Found.")
+                            else:
+                                logger.success(f"{self.session_name} | Scan Results: <g>Civilizations Found.</g>")
+
+                    await asyncio.sleep(random.randint(1, 3))
+
+                    # Auto Scan
+                    if settings.AUTO_SCAN and allow_scan and scan_stat is None:
+                        scan_power = math.floor(int(current_dust) / 10000)
+
+                        scan_status = await api.scan_status(http_client, session_token=self.auth_token)
+                        if scan_status:
+                            if scan_power >= 1:
+                                success_chance = calc_scan_chance(scan_power, total_stars, scan_chance)
+
+                                if success_chance > settings.SCAN_PERCENTAGE:
+                                    scan_data = await api.scan_start(http_client, session_token=self.auth_token, galaxy_id=galaxy_id, power=scan_power)
+
+                                    if not scan_data:
+                                        logger.warning(f"{self.session_name} | Failed to get Scan Data. Retrying in 5 minutes.")
+                                        await asyncio.sleep(300)
+                                        continue
+
+                                    logger.success(f"{self.session_name} | Scan Started: {scan_power}PW ~{success_chance}% Success Chance.")
+
                     await asyncio.sleep(random.randint(1, 3))
 
                     # Auto Redeem Gift
@@ -204,29 +266,36 @@ class Tapper:
                             successful_activations = 0
 
                             for code in gift_code:
-                                code_info = await self.get_gift(http_client, session_token=self.auth_token, gift_id=code)
+                                code_info = await api.get_gift(http_client, session_token=self.auth_token, gift_id=code)
                                 if not code_info:
                                     logger.warning(f"{self.session_name} | Failed to get Code Info. Retrying in 5 minutes.")
                                     await asyncio.sleep(300)
                                     continue
                                 
-                                if code_info == 'used' or code_info == 'incorrect':
-                                    logger.error(f"{self.session_name} | Skipping Code: <y>{code}</y> is {code_info}. Check 'gift-codes.json' for more info.")
-                                    errorGiftCode(code, code_info)
+                                if code_info.get("response", {}).get("available") == False:
+                                    logger.error(f"{self.session_name} | Skipping Code: <y>{code}</y> is Used. Check 'gift-codes.json' for more info.")
+                                    errorGiftCode(code, 'used')
+                                    continue
+
+                                if code_info.get("error", {}).get("code") == 10010:
+                                    logger.error(f"{self.session_name} | Skipping Code: <y>{code}</y> is Incorrect/Invalid. Check 'gift-codes.json' for more info.")
+                                    errorGiftCode(code, 'incorrect')
                                     continue
                                 
                                 code_value = int(code_info['response'].get('value')) or 0
                                 code_sender = code_info['response'].get('sender') or None
 
-                                redeem_data = await self.redeem_gift(http_client, session_token=self.auth_token, gift_id=code)
-                                if redeem_data == 'self':
-                                    logger.error(f"{self.session_name} | Skipping Code: <y>{code}</y>, Code is incorrect or self-made. Check 'gift-codes.json' for more info.")
-                                    errorGiftCode(code, 'incorrect')
-                                    continue
-                                if not redeem_data:
-                                    logger.warning(f"{self.session_name} | Failed to Redeem Code. Retrying in 5 minutes.")
-                                    await asyncio.sleep(300)
-                                    continue
+                                if code_info.get("response", {}).get("available") == True:
+                                    redeem_data = await api.redeem_gift(http_client, session_token=self.auth_token, gift_id=code)
+
+                                    if redeem_data.get("error", {}).get("code") == 10010:
+                                        logger.error(f"{self.session_name} | Skipping Code: <y>{code}</y>, Code is incorrect or self-made. Check 'gift-codes.json' for more info.")
+                                        errorGiftCode(code, 'incorrect')
+                                        continue
+                                    if not redeem_data:
+                                        logger.warning(f"{self.session_name} | Failed to Redeem Code. Retrying in 5 minutes.")
+                                        await asyncio.sleep(300)
+                                        continue
                                 
                                 successful_activations += 1
                                 logger.success(f"{self.session_name} | Code Applied: <g>{code}</g> | Stars: <g>+{code_value}</g> | Sender: <y>@{code_sender}</y>")

@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import ValidationError
 
@@ -7,8 +8,9 @@ class Settings(BaseSettings):
         env_ignore_empty=True
     )
 
-    API_ID: int = None
-    API_HASH: str = None
+    API_ID: Optional[int] = None
+    API_HASH: Optional[str] = None
+
     GLOBAL_CONFIG_PATH: str = "TG_FARM"
 
     FIX_CERT: bool = False
@@ -28,6 +30,9 @@ class Settings(BaseSettings):
 
     AUTO_APPLY_BOOST: bool = True
     EXTRA_BOOST_DELAY: list[int] = [100, 500]
+
+    AUTO_SCAN: bool = False
+    SCAN_PERCENTAGE: int = 10
 
     AUTO_REDEEM_CODE: bool = False
 
@@ -49,5 +54,11 @@ class Settings(BaseSettings):
 try:
     settings = Settings()
 except ValidationError as e:
-    print("Error: `.env` file seems to be invalid, Remove & create/copy again.")
+    for error in e.errors():
+        error_type = error['type']
+        if "extra_forbidden" in error_type:
+            print("Error: `.env` file seems to be invalid. Remove & create/copy again.")
+            exit(-1)
+        else:
+            print(e)
     exit(-1)
