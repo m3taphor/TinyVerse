@@ -56,7 +56,7 @@ async def check_base_url(press_key=True):
                         return True
                 else:
                     logger.error(f"<lr>Update Detected, Main JS Changed! Wait for the developer to update the file, or check the process.</lr>")
-                    logger.error(f"</lr>You can disable this warning by <y>TRACK_BOT_UPDATES</y> in the .env / .env-example file and continue as usual until the developer provides an update.</lr>")
+                    logger.error(f"<lr>You can disable this warning by <y>TRACK_BOT_UPDATES</y> in the .env / .env-example file and continue as usual until the developer provides an update.</lr>")
                     logger.error(f"Main JS (Old): <lr>'{last_actual_js}'</lr> | Hash (Old): <lr>{last_actual_hash}</lr>")
                     logger.warning(f"Main JS (New): <lg>'{js}'</lg> | Hash (New): <lg>{await get_js_hash(js)}</lg>")
                     if press_key:
