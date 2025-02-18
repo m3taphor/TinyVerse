@@ -201,21 +201,6 @@ class Tapper:
 
                     logger.info(f"{self.session_name} | Current Galaxy: <y>{galaxy_name}</y> | Stars: <y>({total_stars}/{total_max_stars})</y> | Created on: <y>{galaxy_day}</y>")
                     await asyncio.sleep(random.randint(1, 3))
-
-                    # Civilization Info
-                    if civilization > 0:
-                        civilization_data = await api.get_civilization(http_client, session_token=self.auth_token, galaxy_id=galaxy_id)
-
-                        if not civilization_data:
-                            logger.warning(f"{self.session_name} | Failed to get Civilization Info. Retrying in 5 minutes.")
-                            await asyncio.sleep(300)
-                            continue
-
-                        ctitle = civilization_data['response'].get('title') or None
-                        cpopulation = civilization_data['response'].get('population') or 0
-                        cpopulationmax = civilization_data['response'].get('population_max') or 0
-
-                        logger.info(f"{self.session_name} | Total Civilizations: <y>{civilization}</y> | Title: <y>{ctitle}</y> | Population: <y>({cpopulation}/{cpopulationmax})</y>")
                     
                     # Scan Results
                     if scan_stat is not None:
